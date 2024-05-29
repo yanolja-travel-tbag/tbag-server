@@ -48,7 +48,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         TokenResponse jwt = tokenProvider.createToken(authentication);
 
         User user = userRepository.findBySocialIdAndIsActivatedIsTrue(Long.valueOf(authentication.getName()))
-                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
 
         return UriComponentsBuilder.fromUriString("/oauth2/redirect")
                 .queryParam("isRegistered", user.getIsRegistered())

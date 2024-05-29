@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -33,4 +33,11 @@ public class UserController {
         UserDto userDto = userService.getUserInfo(userId);
         return ResponseEntity.ok(userDto);
     }
+
+    @PostMapping("/{userId}/deactivate")
+    public ResponseEntity<Void> deactivateUser(@PathVariable Integer userId) {
+        userService.deactivateUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
 }

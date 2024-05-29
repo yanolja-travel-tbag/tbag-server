@@ -36,7 +36,7 @@ public class AuthService {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
         else {
-            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "사용자를 찾을 수 없습니다.");
+            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found");
         }
 
     }

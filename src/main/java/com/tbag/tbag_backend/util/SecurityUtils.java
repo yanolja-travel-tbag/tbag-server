@@ -28,7 +28,7 @@ public class SecurityUtils {
         if (principal instanceof UserPrincipal) {
             return ((UserPrincipal) principal).getUser();
         }
-        throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "사용자를 찾을 수 없음");
+        throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found");
     }
 
     private static boolean isAuthenticated(Authentication authentication) {
@@ -38,7 +38,7 @@ public class SecurityUtils {
     private static Authentication getAuthentication() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (isAuthenticated(authentication)) {
-            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "사용자를 찾을 수 없음");
+            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found");
         }
         return authentication;
     }
