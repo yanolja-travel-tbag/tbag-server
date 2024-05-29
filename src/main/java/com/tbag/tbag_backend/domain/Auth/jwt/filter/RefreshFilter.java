@@ -30,7 +30,7 @@ public class RefreshFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) throws ServletException, IOException {
 
 
-        if (request.getRequestURI().equals("/auth/tokenRefresh")) {
+        if (request.getRequestURI().equals("/api/auth/tokenRefresh")) {
 
             String refresh_token = tokenProvider.resolveToken(request);
 

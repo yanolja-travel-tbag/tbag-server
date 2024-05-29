@@ -1,11 +1,18 @@
 package com.tbag.tbag_backend.domain.User.service;
 
+import com.tbag.tbag_backend.domain.Artist.Artist;
+import com.tbag.tbag_backend.domain.Artist.repository.ArtistRepository;
+import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.dto.PreferredArtistRequest;
+import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.dto.UserPreferredArtistDto;
+import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.entity.UserPreferredArtist;
+import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.entity.UserPreferredArtistId;
+import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.repository.UserPreferredArtistRepository;
 import com.tbag.tbag_backend.domain.Genre.Genre;
+import com.tbag.tbag_backend.domain.Genre.repository.GenreRepository;
 import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.dto.PreferredGenreRequest;
 import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.dto.UserPreferredGenreDto;
 import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.entity.UserPreferredGenre;
 import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.entity.UserPreferredGenreId;
-import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.repository.GenreRepository;
 import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.repository.UserPreferredGenreRepository;
 import com.tbag.tbag_backend.domain.User.dto.UserDto;
 import com.tbag.tbag_backend.domain.User.entity.User;
@@ -30,7 +37,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserPreferredGenreRepository userPreferredGenreRepository;
+    private final UserPreferredArtistRepository userPreferredArtistRepository;
     private final GenreRepository genreRepository;
+    private final ArtistRepository artistRepository;
+
 
     @Value("${kakao.admin-key}")
     private String serviceAppAdminKey;
@@ -39,7 +49,7 @@ public class UserService {
     private String unlinkUrl;
 
     @Transactional
-    public void updateUserRegistrationStatus(Integer userId, List<PreferredGenreRequest> preferredGenres) {
+    public void updateUserRegistrationStatus(Integer userId, List<PreferredGenreRequest> preferredGenres, List<PreferredArtistRequest> preferredArtists) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND,"User not found"));
 
         for (PreferredGenreRequest preferredGenre : preferredGenres) {
@@ -52,6 +62,19 @@ public class UserService {
                         .genre(genre)
                         .build();
                 userPreferredGenreRepository.save(userPreferredGenre);
+            }
+        }
+
+        for (PreferredArtistRequest preferredArtist : preferredArtists) {
+            for (Long artistId : preferredArtist.getArtistIds()) {
+                Artist artist = artistRepository.findById(artistId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND,"Artist not found"));
+                UserPreferredArtistId userPreferredArtistId = new UserPreferredArtistId(userId, artistId);
+                UserPreferredArtist userPreferredArtist = UserPreferredArtist.builder()
+                        .id(userPreferredArtistId)
+                        .user(user)
+                        .artist(artist)
+                        .build();
+                userPreferredArtistRepository.save(userPreferredArtist);
             }
         }
 
@@ -71,6 +94,13 @@ public class UserService {
                         .build())
                 .collect(Collectors.toList());
 
+        List<UserPreferredArtistDto> preferredArtists = userPreferredArtistRepository.findByUser(user).stream()
+                .map(upa -> UserPreferredArtistDto.builder()
+                        .artistId(upa.getArtist().getId())
+                        .artistName(upa.getArtist().getName())
+                        .build())
+                .collect(Collectors.toList());
+
         return UserDto.builder()
                 .userId(user.getId())
                 .nickname(user.getNickname())
@@ -83,8 +113,10 @@ public class UserService {
                 .socialType(user.getSocialType().name())
                 .isRegistered(user.getIsRegistered())
                 .preferredGenres(preferredGenres)
+                .preferredArtists(preferredArtists)
                 .build();
     }
+
 
     @Transactional
     public void deactivateUser(Integer userId) {

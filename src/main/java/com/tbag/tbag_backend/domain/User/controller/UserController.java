@@ -1,7 +1,7 @@
 package com.tbag.tbag_backend.domain.User.controller;
 
 
-import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.dto.PreferredGenreRequest;
+import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.dto.UserRegistrationRequest;
 import com.tbag.tbag_backend.domain.User.dto.UserDto;
 import com.tbag.tbag_backend.domain.User.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 
 
 @Slf4j
@@ -22,8 +21,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/{userId}/update-registration")
-    public ResponseEntity<Void> updateUserRegistrationStatus(@PathVariable Integer userId, @RequestBody List<PreferredGenreRequest> preferredGenres) {
-        userService.updateUserRegistrationStatus(userId, preferredGenres);
+    public ResponseEntity<Void> updateUserRegistrationStatus(@PathVariable Integer userId, @RequestBody UserRegistrationRequest request) {
+        userService.updateUserRegistrationStatus(userId, request.getPreferredGenres(), request.getPreferredArtists());
         return ResponseEntity.ok().build();
     }
 

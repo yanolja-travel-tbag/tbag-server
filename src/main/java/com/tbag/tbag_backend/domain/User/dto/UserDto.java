@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.User.dto;
 
+import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.dto.UserPreferredArtistDto;
 import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.dto.UserPreferredGenreDto;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,5 +27,5 @@ public class UserDto {
     private String socialType;
     private Boolean isRegistered;
     private List<UserPreferredGenreDto> preferredGenres;
-
+    private List<UserPreferredArtistDto> preferredArtists;
 }

@@ -21,12 +21,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
-    private final UserRepository userRepository;
-
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain) throws ServletException, IOException {
 
-        // 토큰의 인증 정보를 Security Context에 저장하는 역할 수행
 
         try {
             String jwt = tokenProvider.resolveToken(request);

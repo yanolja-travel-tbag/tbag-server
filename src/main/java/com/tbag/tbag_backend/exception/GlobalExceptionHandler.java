@@ -36,7 +36,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @RestControllerAdvice
-@Profile("prod")
+//@Profile("prod")
 public class GlobalExceptionHandler {
 
     private final Slack slackClient = Slack.getInstance();

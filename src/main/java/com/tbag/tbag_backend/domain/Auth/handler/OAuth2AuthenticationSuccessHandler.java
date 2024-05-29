@@ -51,6 +51,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
 
         return UriComponentsBuilder.fromUriString("/oauth2/redirect")
+                .queryParam("userId", user.getId())
                 .queryParam("isRegistered", user.getIsRegistered())
                 .queryParam("accessToken", jwt.getAccessToken())
                 .queryParam("refreshToken", jwt.getRefreshToken())

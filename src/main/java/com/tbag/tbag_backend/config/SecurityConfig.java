@@ -63,7 +63,7 @@ public class SecurityConfig {
                         "/oauth2/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .addFilterBefore(new JwtFilter(tokenProvider, userRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new RefreshFilter(tokenProvider, redisTemplate), JwtFilter.class)
                 .addFilterBefore(new GlobalExceptionHandlerFilter(), RefreshFilter.class)
                 .oauth2Login()

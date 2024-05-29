@@ -129,14 +129,13 @@ public class TokenProvider implements
 
         Integer userId = claims.get("userId", Integer.class);
 
-        User user = userRepository.findOneWithAuthoritiesByIdAndIsActivatedIsTrue(userId)
+        User user = userRepository.findOneByIdAndIsActivatedIsTrue(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TOKEN, "User not found"));
 
         Collection<SimpleGrantedAuthority> authorities = Stream.of(
                         String.valueOf(claims.get(AUTHORITIES)).split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-
 
         UserDetails userDetails = UserPrincipal.create(user, authorities);
 
@@ -161,6 +160,7 @@ public class TokenProvider implements
 
     public String resolveToken(HttpServletRequest request) {
         String token = request.getHeader(AUTHORIZATION);
+
         if (StringUtils.hasText(token) && token.startsWith(BEARER_PREFIX)) {
             return token.substring(7);
         }
