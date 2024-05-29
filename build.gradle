@@ -1,0 +1,106 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.hibernate:hibernate-gradle-plugin:5.6.15.Final"
+    }
+}
+
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.7.10'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+group = 'com.tbag'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+apply plugin: 'org.hibernate.orm'
+
+hibernate {
+    enhance {
+        // available options - all default to false
+        enableLazyInitialization = true
+        enableDirtyTracking = true
+        enableAssociationManagement = true
+        enableExtendedEnhancement = false
+    }
+}
+
+ext {
+    springCloudVersion = '2021.0.3'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'mysql:mysql-connector-java:8.0.28'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    // jwt 토큰
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // db
+    implementation 'mysql:mysql-connector-java:8.0.28'
+
+    // junit
+    testImplementation 'junit:junit:4.5'
+
+    // mapper
+    implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // OAuth 2.0
+    implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
+
+
+    // queryDSL 설정
+    implementation 'com.querydsl:querydsl-jpa'
+    implementation "com.querydsl:querydsl-core"
+    implementation "com.querydsl:querydsl-collections"
+    implementation 'com.querydsl:querydsl-sql-spatial:4.4.0'
+
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+
+    // web hook
+    implementation 'com.slack.api:slack-api-client:1.29.0'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
