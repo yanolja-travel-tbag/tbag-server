@@ -59,6 +59,21 @@ public class User {
         this.socialType = socialType;
     }
 
+    @Builder
+    public User(Integer id, String nickname, LocalDateTime createdAt, Boolean marketingAgree, Boolean isActivated,
+                LocalDate nickChange, LocalDateTime lastAccessed, Long socialId, String socialType, Boolean isRegistered) {
+        this.id = id;
+        this.nickname = nickname;
+        this.createdAt = createdAt;
+        this.marketingAgree = marketingAgree;
+        this.isActivated = isActivated;
+        this.nickChange = nickChange;
+        this.lastAccessed = lastAccessed;
+        this.socialId = socialId;
+        this.socialType = SocialType.valueOf(socialType);
+        this.isRegistered = isRegistered;
+    }
+
 
     public User updateMarketingAgree(Boolean marketingAgree) {
         this.marketingAgree = marketingAgree;
@@ -89,6 +104,10 @@ public class User {
         this.socialId = socialId;
 
         return this;
+    }
+
+    public void updateIsRegistered(Boolean isRegistered) {
+        this.isRegistered = isRegistered;
     }
 
 }

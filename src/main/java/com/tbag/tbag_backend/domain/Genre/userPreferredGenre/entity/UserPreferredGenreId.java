@@ -1,4 +1,4 @@
-package com.tbag.tbag_backend.domain.Genre.userPreferredGenre;
+package com.tbag.tbag_backend.domain.Genre.userPreferredGenre.entity;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -19,4 +19,10 @@ public class UserPreferredGenreId implements Serializable {
     private String mediaType;
     private Long genreId;
 
+
+    public UserPreferredGenreId(Integer userId, String mediaType, Long genreId) {
+        this.userId = userId;
+        this.mediaType = mediaType;
+        this.genreId = genreId;
+    }
 }

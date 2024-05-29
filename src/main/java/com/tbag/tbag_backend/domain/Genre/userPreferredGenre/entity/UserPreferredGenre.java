@@ -1,9 +1,11 @@
-package com.tbag.tbag_backend.domain.Genre.userPreferredGenre;
+package com.tbag.tbag_backend.domain.Genre.userPreferredGenre.entity;
 
 import com.tbag.tbag_backend.domain.Genre.Genre;
 import com.tbag.tbag_backend.domain.User.entity.User;
 import lombok.Getter;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Entity
@@ -25,5 +27,10 @@ public class UserPreferredGenre {
     @JoinColumn(name = "genre_id")
     private Genre genre;
 
+    @Builder
+    public UserPreferredGenre(UserPreferredGenreId id, User user, Genre genre) {
+        this.id = id;
+        this.user = user;
+        this.genre = genre;
+    }
 }
-
