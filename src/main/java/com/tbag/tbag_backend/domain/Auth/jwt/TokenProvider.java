@@ -76,7 +76,7 @@ public class TokenProvider implements
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        User user = userRepository.findBySocialIdAndIsActivatedIsTrue(Long.valueOf(authentication.getName())).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + Long.valueOf(authentication.getName())));
+        User user = userRepository.findBySocialIdAndIsActivatedIsTrue(authentication.getName()).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + authentication.getName()));
 
         return createTokenForUser(user, authorities);
     }

@@ -27,7 +27,7 @@ public class User {
     private SocialType socialType;
 
     @Column(name = "social_id")
-    private Long socialId;
+    private String socialId;
 
     @Column(nullable = false)
     private String nickname;
@@ -53,7 +53,7 @@ public class User {
     private LocalDateTime lastAccessed;
 
     @Builder
-    public User(String nickname, Long socialId, SocialType socialType) {
+    public User(String nickname, String socialId, SocialType socialType) {
         this.nickname = nickname;
         this.socialId = socialId;
         this.socialType = socialType;
@@ -61,7 +61,7 @@ public class User {
 
     @Builder
     public User(Integer id, String nickname, LocalDateTime createdAt, Boolean marketingAgree, Boolean isActivated,
-                LocalDate nickChange, LocalDateTime lastAccessed, Long socialId, String socialType, Boolean isRegistered) {
+                LocalDate nickChange, LocalDateTime lastAccessed, String socialId, String socialType, Boolean isRegistered) {
         this.id = id;
         this.nickname = nickname;
         this.createdAt = createdAt;
@@ -100,7 +100,7 @@ public class User {
         return this;
     }
 
-    public User updateSocialId(Long socialId) {
+    public User updateSocialId(String socialId) {
         this.socialId = socialId;
 
         return this;

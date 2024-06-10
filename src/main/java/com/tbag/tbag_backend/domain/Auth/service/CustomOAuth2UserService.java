@@ -1,7 +1,7 @@
 package com.tbag.tbag_backend.domain.Auth.service;
 
 
-import com.tbag.tbag_backend.domain.Auth.dto.kakao.KakaoOAuthAttributes;
+import com.tbag.tbag_backend.domain.Auth.dto.OAuthAttributes;
 import com.tbag.tbag_backend.domain.User.entity.User;
 import com.tbag.tbag_backend.domain.User.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +35,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         String userNameAttributeName = userRequest.getClientRegistration().getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
-        KakaoOAuthAttributes attributes = KakaoOAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
+        OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
-        saveOrUpdate(attributes);
+        saveOrUpdate(registrationId, attributes);
 
         return new DefaultOAuth2User(
                 Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")),
@@ -45,10 +45,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 attributes.getNameAttributeKey());
     }
 
-    private User saveOrUpdate(KakaoOAuthAttributes attributes) {
+    private User saveOrUpdate(String registrationId, OAuthAttributes attributes) {
         Optional<User> user = userRepository.findBySocialIdAndIsActivatedIsTrue(attributes.getOauthId());
         if (!user.isPresent()) {
-            return userRepository.save(attributes.toEntity());
+            return userRepository.save(attributes.toEntity(registrationId));
         }
         else if (user.get().getSocialId() == null){
             user.get().updateSocialId(attributes.getOauthId());

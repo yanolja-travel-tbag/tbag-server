@@ -1,15 +1,16 @@
-package com.tbag.tbag_backend.domain.Auth.dto.kakao;
+package com.tbag.tbag_backend.domain.Auth.dto;
 
 import com.tbag.tbag_backend.domain.Auth.Enum.SocialType;
 import com.tbag.tbag_backend.domain.User.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 @Getter
-public class KakaoOAuthAttributes {
+public class OAuthAttributes {
     private final Map<String, Object> attributes;
     private final String nameAttributeKey;
     private final String name;
@@ -18,10 +19,10 @@ public class KakaoOAuthAttributes {
     private final String gender;
     private final String age_range;
     private final String profile_image;
-    private final Long oauthId;
+    private final String oauthId;
 
     @Builder
-    public KakaoOAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email, String birth, String gender, String age_range, String profile_image, Long oauthId) {
+    public OAuthAttributes(Map<String, Object> attributes, String nameAttributeKey, String name, String email, String birth, String gender, String age_range, String profile_image, String oauthId) {
         this.attributes = attributes;
         this.nameAttributeKey = nameAttributeKey;
         this.name = name;
@@ -33,19 +34,23 @@ public class KakaoOAuthAttributes {
         this.oauthId = oauthId;
     }
 
-    public static KakaoOAuthAttributes of(String socialName, String userNameAttributeName, Map<String, Object> attributes) {
-        // 카카오
+    public static OAuthAttributes of(String socialName, String userNameAttributeName, Map<String, Object> attributes) {
+
         if ("kakao".equals(socialName)) {
             return ofKakao(userNameAttributeName, attributes);
+        }
+
+        if ("google".equals(socialName)) {
+            return ofGoogle(userNameAttributeName, attributes);
         }
 
         return null;
     }
 
-    private static KakaoOAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
-        Long id = (Long) attributes.get("id");
+    private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
+        String id = attributes.get("id").toString();
 
-        return KakaoOAuthAttributes.builder()
+        return OAuthAttributes.builder()
                 .name(generateRandomNickname())
                 .nameAttributeKey(userNameAttributeName)
                 .attributes(attributes)
@@ -53,11 +58,25 @@ public class KakaoOAuthAttributes {
                 .build();
     }
 
-    public User toEntity() {
+    private static OAuthAttributes ofGoogle(String userNameAttributeName,
+                                            Map<String, Object> attributes) {
+
+        String id = attributes.get("sub").toString();
+
+        return OAuthAttributes.builder()
+                .name(generateRandomNickname())
+                .nameAttributeKey(userNameAttributeName)
+                .attributes(attributes)
+                .oauthId(id)
+                .build();
+    }
+
+
+    public User toEntity(String registrationId) {
         return User.builder()
                 .nickname(name)
                 .socialId(oauthId)
-                .socialType(SocialType.KAKAO)
+                .socialType(SocialType.valueOf(registrationId.toUpperCase(Locale.ROOT)))
                 .build();
     }
 

@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Integer> {
 //    Optional<User> findByIdAndActivatedIsTrue(Integer id);
     Optional<User> findOneByIdAndIsActivatedIsTrue(Integer userId);
-    Optional<User> findBySocialIdAndIsActivatedIsTrue(Long socialId);
+    Optional<User> findBySocialIdAndIsActivatedIsTrue(String socialId);
 }
 
