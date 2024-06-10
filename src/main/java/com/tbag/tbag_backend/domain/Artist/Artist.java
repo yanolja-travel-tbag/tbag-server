@@ -1,8 +1,11 @@
 package com.tbag.tbag_backend.domain.Artist;
 
+import com.tbag.tbag_backend.common.LocalizedNameDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Getter
@@ -15,7 +18,22 @@ public class Artist {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", columnDefinition = "TEXT", nullable = false)
-    private String name;
+    @Transient
+    private LocalizedNameDto name;
 
+    @JsonIgnore
+    @Column(name = "name_eng", nullable = false)
+    private String nameEng;
+
+    @JsonIgnore
+    @Column(name = "name_kor", nullable = false)
+    private String nameKor;
+
+    @PostLoad
+    private void postLoad() {
+        this.name = LocalizedNameDto.builder()
+                .eng(this.nameEng)
+                .kor(this.nameKor)
+                .build();
+    }
 }

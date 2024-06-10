@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.Genre.userPreferredGenre.dto;
 
+import com.tbag.tbag_backend.common.LocalizedNameDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,6 @@ public class UserPreferredGenreDto {
 
     private String mediaType;
     private Long genreId;
-    private String genreName;
+    private LocalizedNameDto genreName;
 
 }

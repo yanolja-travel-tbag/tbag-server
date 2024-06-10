@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Builder;
 
@@ -23,9 +24,9 @@ public class UserDto {
     private Boolean isActivated;
     private LocalDate nickChange;
     private LocalDateTime lastAccessed;
-    private Long socialId;
+    private String socialId;
     private String socialType;
     private Boolean isRegistered;
-    private List<UserPreferredGenreDto> preferredGenres;
+    private Map<String, List<UserPreferredGenreDto>> preferredGenres;
     private List<UserPreferredArtistDto> preferredArtists;
 }
