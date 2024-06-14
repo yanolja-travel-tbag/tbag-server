@@ -60,7 +60,8 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/", "/exception/**", "/error", "/favicon.ico", "/public/**",
                         "/auth/login", "/auth/logout", "/auth/signup",
-                        "/oauth2/**").permitAll()
+                        "/oauth2/**",
+                        "/public/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
