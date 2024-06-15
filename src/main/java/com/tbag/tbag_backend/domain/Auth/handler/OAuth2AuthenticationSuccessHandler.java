@@ -8,6 +8,7 @@ import com.tbag.tbag_backend.exception.CustomException;
 import com.tbag.tbag_backend.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+    @Value("${front.base-url}")
+    private String frontBaseUrl;
     private final TokenProvider tokenProvider;
     private final UserRepository userRepository;
 
@@ -50,7 +53,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         User user = userRepository.findBySocialIdAndIsActivatedIsTrue(authentication.getName())
                 .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
 
-        return UriComponentsBuilder.fromUriString("/oauth2/redirect")
+        return UriComponentsBuilder.fromUriString(frontBaseUrl + "/signin/pending/redirect")
                 .queryParam("userId", user.getId())
                 .queryParam("isRegistered", user.getIsRegistered())
                 .queryParam("accessToken", jwt.getAccessToken())
