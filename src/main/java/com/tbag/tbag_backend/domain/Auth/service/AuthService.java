@@ -56,7 +56,7 @@ public class AuthService {
 
     public TokenResponse refreshToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        TokenResponse jwt = tokenProvider.createToken(authentication);
+        TokenResponse jwt = tokenProvider.createRefreshToken(authentication);
         redisTemplate.opsForValue().set(
                 authentication.getName(),
                 jwt.getRefreshToken(),

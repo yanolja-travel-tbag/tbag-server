@@ -58,8 +58,8 @@ public class SecurityConfig {
                 .and()
 
                 .authorizeRequests()
-                .antMatchers("/", "/exception/**", "/error", "/favicon.ico", "/public/**",
-                        "/auth/login", "/auth/logout", "/auth/signup",
+                .antMatchers("/", "/exception/**", "/error", "/favicon.ico",
+                        "/auth/login", "/auth/signup",
                         "/oauth2/**",
                         "/public/**").permitAll()
                 .anyRequest().authenticated()
