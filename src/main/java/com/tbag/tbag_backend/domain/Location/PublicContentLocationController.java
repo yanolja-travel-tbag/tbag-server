@@ -31,5 +31,10 @@ public class PublicContentLocationController {
         return contentLocationService.getContentLocations(mediaType);
     }
 
+    @GetMapping("/{id}")
+    public ContentLocationDto getContentLocationById(@PathVariable Long id) {
+        return contentLocationService.getContentLocationById(id);
+    }
+
 }
 
