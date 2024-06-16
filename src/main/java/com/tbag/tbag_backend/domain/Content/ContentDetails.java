@@ -23,13 +23,13 @@ public class ContentDetails {
     @Column(name = "ref_id", nullable = false)
     private Long refId;
 
-    @Column(name = "title", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "original_title", columnDefinition = "TEXT")
+    @Column(name = "original_title")
     private String originalTitle;
 
-    @Column(name = "overview", columnDefinition = "TEXT")
+    @Column(name = "overview")
     private String overview;
 
     @Column(name = "release_date")
@@ -50,13 +50,13 @@ public class ContentDetails {
     @Column(name = "vote_average")
     private Float voteAverage;
 
-    @Column(name = "poster_path", columnDefinition = "TEXT")
+    @Column(name = "poster_path")
     private String posterPath;
 
-    @Column(name = "backdrop_path", columnDefinition = "TEXT")
+    @Column(name = "backdrop_path")
     private String backdropPath;
 
-    @Column(name = "videos", columnDefinition = "JSON")
+    @Column(name = "videos")
     private String videos;
 
 }

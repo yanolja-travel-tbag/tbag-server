@@ -25,5 +25,11 @@ public class PublicContentLocationController {
     public void incrementViewCount(@PathVariable Long id) {
         contentLocationService.incrementViewCount(id);
     }
+
+    @GetMapping
+    public List<MapContentLocationDto> getAllContentLocations(@RequestParam(required = false, defaultValue = "all") String mediaType) {
+        return contentLocationService.getContentLocations(mediaType);
+    }
+
 }
 

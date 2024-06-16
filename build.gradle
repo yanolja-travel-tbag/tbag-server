@@ -99,6 +99,10 @@ dependencies {
 
     // web hook
     implementation 'com.slack.api:slack-api-client:1.29.0'
+
+    // cache
+    implementation 'org.springframework.boot:spring-boot-starter-cache'
+    implementation 'com.github.ben-manes.caffeine:caffeine:2.9.1'
 }
 
 tasks.named('test') {

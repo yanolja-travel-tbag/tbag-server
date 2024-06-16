@@ -5,6 +5,7 @@ import com.tbag.tbag_backend.domain.Location.locationImage.LocationImage;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImageDto;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -81,6 +82,22 @@ public class ContentLocationService {
                 .thumbnailUrl(locationImage.getThumbnailUrl())
                 .sizeHeight(locationImage.getSizeHeight())
                 .sizeWidth(locationImage.getSizeWidth())
+                .build();
+    }
+
+    @Cacheable(value = "contentLocations")
+    public List<MapContentLocationDto> getContentLocations(String mediaType) {
+        List<MapContentLocationProjection> projections = contentLocationRepository.findByMediaType(mediaType);
+        return projections.stream().map(this::mapToSimpleDto).collect(Collectors.toList());
+    }
+
+    private MapContentLocationDto mapToSimpleDto(MapContentLocationProjection projection) {
+        return MapContentLocationDto.builder()
+                .id(projection.getId())
+                .contentTitle(projection.getContentTitle())
+                .type(projection.getContentMediaType())
+                .latitude(projection.getLatitude())
+                .longitude(projection.getLongitude())
                 .build();
     }
 }

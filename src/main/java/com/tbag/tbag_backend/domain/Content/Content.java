@@ -15,10 +15,10 @@ public class Content {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "media_type", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "media_type", nullable = false)
     private String mediaType;
 
-    @Column(name = "title", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "title", nullable = false)
     private String title;
 
 }
