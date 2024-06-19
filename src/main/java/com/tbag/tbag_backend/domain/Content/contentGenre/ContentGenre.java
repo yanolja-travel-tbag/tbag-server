@@ -1,9 +1,10 @@
 package com.tbag.tbag_backend.domain.Content.contentGenre;
 
-import com.tbag.tbag_backend.domain.Content.ContentDetails;
+import com.tbag.tbag_backend.domain.Content.Content;
 import com.tbag.tbag_backend.domain.Genre.Genre;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Entity
@@ -18,7 +19,7 @@ public class ContentGenre {
     @MapsId("contentId")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "content_id")
-    private ContentDetails contentDetails;
+    private Content content;
 
     @MapsId("genreId")
     @ManyToOne(fetch = FetchType.LAZY)

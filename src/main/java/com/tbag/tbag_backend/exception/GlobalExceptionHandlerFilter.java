@@ -25,7 +25,7 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-//@Profile("prod")
+@Profile("prod")
 public class GlobalExceptionHandlerFilter extends OncePerRequestFilter {
 
     @Override

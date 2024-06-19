@@ -1,6 +1,6 @@
 package com.tbag.tbag_backend.domain.Location.locationImage;
 
-import com.tbag.tbag_backend.domain.Location.ContentLocation;
+import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;

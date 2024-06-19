@@ -1,4 +1,4 @@
-package com.tbag.tbag_backend.domain.Location;
+package com.tbag.tbag_backend.domain.Location.entity;
 
 import com.tbag.tbag_backend.domain.Content.Content;
 import lombok.Getter;

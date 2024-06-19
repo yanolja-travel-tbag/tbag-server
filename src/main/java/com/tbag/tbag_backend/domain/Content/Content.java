@@ -21,4 +21,7 @@ public class Content {
     @Column(name = "title", nullable = false)
     private String title;
 
+    @Column(name = "title_eng", nullable = false)
+    private String titleEng;
+
 }
