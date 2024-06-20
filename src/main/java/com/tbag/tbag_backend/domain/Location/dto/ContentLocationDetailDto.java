@@ -18,7 +18,7 @@ public class ContentLocationDetailDto {
     private LocalizedNameDto businessHours;
     private LocalizedNameDto holiday;
     private LocalizedNameDto locationString;
-    private String placeType;
+    private LocalizedNameDto placeType;
     private Double latitude;
     private Double longitude;
     private String phoneNumber;

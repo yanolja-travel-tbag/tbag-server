@@ -1,14 +1,14 @@
-package com.tbag.tbag_backend.domain.Location.service;
+package com.tbag.tbag_backend.domain.Content;
 
 import com.tbag.tbag_backend.common.LocalizedNameDto;
-import com.tbag.tbag_backend.domain.Content.*;
+import com.tbag.tbag_backend.domain.Actor.ContentSearchDto;
 import com.tbag.tbag_backend.domain.Content.contentArtist.ContentArtist;
-import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
-import com.tbag.tbag_backend.domain.Location.repository.ContentLocationRepository;
+import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImage;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImageDto;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImageRepository;
+import com.tbag.tbag_backend.domain.Location.repository.ContentLocationRepository;
 import com.tbag.tbag_backend.exception.CustomException;
 import com.tbag.tbag_backend.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -16,37 +16,86 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ContentLocationService {
+public class ContentService {
 
+    private final ContentRepository contentRepository;
     private final ContentLocationRepository contentLocationRepository;
-    private final LocationImageRepository locationImageRepository;
     private final ContentDetailRepository contentDetailsRepository;
     private final ContentGenreRepository contentGenreRepository;
+    private final LocationImageRepository locationImageRepository;
     private final ContentArtistRepository contentArtistRepository;
-
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
+    public Page<ContentSearchDto> searchContent(String keyword, Pageable pageable) {
+        Page<Content> contents = contentRepository.findByTitleContainingAndMediaTypeNot(keyword, "artist", pageable);
 
-    public ContentLocationDetailDto getContentLocationById(Long id) {
-        Optional<ContentLocation> locationOptional = contentLocationRepository.findById(id);
-        if (locationOptional.isPresent()) {
-            ContentLocation location = locationOptional.get();
-            return mapToContentLocationDetailDto(location);
-        } else {
-            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found");
-        }
+        return contents.map(content -> getContentSearchDto(content));
     }
 
+    public ContentSearchDto getContentById(Long contentId) {
+        Content content = contentRepository.findById(contentId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Content not found"));
+
+        return getContentSearchDto(content);
+    }
+
+    private ContentSearchDto getContentSearchDto(Content content) {
+        ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
+
+        List<ContentSearchDto.ActorDto> actors = content.getContentActors().stream()
+                .map(contentActor -> ContentSearchDto.ActorDto.builder()
+                        .name(mapToLocalizedNameDto(contentActor.getActor().getName(), contentActor.getActor().getOriginalName()))
+                        .character(mapToLocalizedNameDto(contentActor.getCharacterEng(), contentActor.getCharacter()))
+                        .profilePath(imageBaseUrl+contentActor.getActor().getProfilePath())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<String> contentImages = new ArrayList<>();
+        List<LocalizedNameDto> contentGenres;
+
+        contentGenres = contentGenreRepository.findByContentId(content.getId()).stream()
+                .map(genre -> mapToLocalizedNameDto(genre.getGenre().getNameEng(), genre.getGenre().getNameKor()))
+                .collect(Collectors.toList());
+
+        if (contentDetails.getPosterPath() != null) {
+            contentImages.add(imageBaseUrl + contentDetails.getPosterPath());
+        }
+        if (contentDetails.getBackdropPath() != null) {
+            contentImages.add(imageBaseUrl + contentDetails.getBackdropPath());
+        }
+
+
+        return ContentSearchDto.builder()
+                .id(content.getId())
+                .title(mapToLocalizedNameDto(content.getTitleEng(), content.getTitle()))
+                .viewCount(content.getViewCount())
+                .genres(contentGenres)
+                .actors(actors)
+                .contentImages(contentImages)
+                .build();
+    }
+
+
+    private LocalizedNameDto mapToLocalizedNameDto(String eng, String kor) {
+        return LocalizedNameDto.builder()
+                .eng(eng)
+                .kor(kor)
+                .build();
+    }
+
+    public Page<ContentLocationDetailDto> getRelatedLocations(Long id, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ContentLocation> locationsPage = contentLocationRepository
+                .findRelatedLocations(id, pageable);
+
+        return locationsPage.map(this::mapToContentLocationDetailDto);
+    }
 
     private ContentLocationDetailDto mapToContentLocationDetailDto(ContentLocation location) {
         LocationImage image = locationImageRepository.findFirstByContentLocationOrderByIdAsc(location);
@@ -96,14 +145,6 @@ public class ContentLocationService {
                 .build();
     }
 
-
-    private LocalizedNameDto mapToLocalizedNameDto(String eng, String kor) {
-        return LocalizedNameDto.builder()
-                .eng(eng)
-                .kor(kor)
-                .build();
-    }
-
     private LocationImageDto mapToLocationImageDto(LocationImage image) {
         return LocationImageDto.builder()
                 .imageUrl(image.getImageUrl())
@@ -113,23 +154,5 @@ public class ContentLocationService {
                 .build();
     }
 
-    public Page<ContentLocationDetailDto> getRecommendedContentLocations(Long id, int page, int size) {
-        ContentLocation currentLocation = contentLocationRepository.findById(id)
-                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found"));
-
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ContentLocation> locationsPage = contentLocationRepository
-                .findRecommendedLocations(currentLocation.getContent().getId(), currentLocation.getPlaceType(), id, pageable);
-
-        return locationsPage.map(this::mapToContentLocationDetailDto);
-    }
-
-    public Page<ContentLocationDetailDto> searchContentLocations(String keyword, int page, int size) {
-        String trimmedKeyword = keyword.trim();
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<ContentLocation> locations = contentLocationRepository.findByKeyword(trimmedKeyword, pageable);
-
-        return locations.map(this::mapToContentLocationDetailDto);
-    }
 }
+

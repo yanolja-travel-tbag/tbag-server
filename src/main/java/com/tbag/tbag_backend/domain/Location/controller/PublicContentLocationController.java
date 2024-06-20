@@ -1,10 +1,13 @@
 package com.tbag.tbag_backend.domain.Location.controller;
 
+import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
 import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDto;
 import com.tbag.tbag_backend.domain.Location.dto.MapContentLocationDto;
 import com.tbag.tbag_backend.domain.Location.dto.MarkerLocationDto;
+import com.tbag.tbag_backend.domain.Location.service.ContentLocationService;
 import com.tbag.tbag_backend.domain.Location.service.PublicContentLocationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +17,7 @@ import java.util.List;
 public class PublicContentLocationController {
 
     private final PublicContentLocationService publicContentLocationService;
+    private final ContentLocationService contentLocationService;
 
     @GetMapping("/top-viewed")
     public List<ContentLocationDto> getTop5ByViewCount(@RequestParam String mediaType) {
@@ -38,6 +42,15 @@ public class PublicContentLocationController {
     @GetMapping("/{id}")
     public MarkerLocationDto getContentLocationById(@PathVariable Long id) {
         return publicContentLocationService.getContentLocationById(id);
+    }
+
+
+    @GetMapping("/search")
+    public Page<ContentLocationDetailDto> searchContentLocations(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return contentLocationService.searchContentLocations(keyword, page, size);
     }
 
 }

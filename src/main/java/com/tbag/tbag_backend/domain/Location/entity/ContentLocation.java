@@ -31,6 +31,9 @@ public class ContentLocation {
     @Column(name = "place_type", columnDefinition = "VARCHAR(255)", nullable = false)
     private String placeType;
 
+    @Column(name = "place_type_eng", columnDefinition = "VARCHAR(255)", nullable = false)
+    private String placeTypeEng;
+
     @Column(name = "place_description", columnDefinition = "TEXT", nullable = false)
     private String placeDescription;
 

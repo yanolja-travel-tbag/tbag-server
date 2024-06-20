@@ -18,6 +18,9 @@ public class ContentActor {
     @Column(name = "character")
     private String character;
 
+    @Column(name = "character_eng")
+    private String characterEng;
+
     @Column(name = "credit_id")
     private String creditId;
 

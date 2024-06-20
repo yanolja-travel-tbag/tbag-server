@@ -29,6 +29,10 @@ public class Artist {
     @Column(name = "name_kor", nullable = false)
     private String nameKor;
 
+    @JsonIgnore
+    @Column(name = "image", nullable = true)
+    private String image;
+
     @PostLoad
     private void postLoad() {
         this.name = LocalizedNameDto.builder()

@@ -61,13 +61,6 @@ public class GlobalExceptionHandlerFilter extends OncePerRequestFilter {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             var errorResponse = ErrorResponse.toResponseEntity(e.getErrorCode(), e.getValue()).getBody();
 
-            String jwtToken = null;
-
-            String authorizationHeader = request.getHeader("Authorization");
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                jwtToken = authorizationHeader.substring(7); // "Bearer " 이후의 부분이 실제 토큰
-            }
-
             ReqResLogging reqResLogging = new ReqResLogging(
                     traceId,
                     request.getMethod(),
@@ -78,9 +71,7 @@ public class GlobalExceptionHandlerFilter extends OncePerRequestFilter {
                     deviceType,
                     requestBody,
                     errorResponse,
-                    elapsedTimeStr,
-                    jwtToken
-            );
+                    elapsedTimeStr);
 
             try {
                 String json = objectMapper.writeValueAsString(errorResponse);
@@ -89,7 +80,6 @@ public class GlobalExceptionHandlerFilter extends OncePerRequestFilter {
                 response.getWriter().write(json);
                 log.info(objectMapper.writeValueAsString(reqResLogging));
 
-//                response.getWriter().write(json);
             } catch (IOException er) {
                 er.printStackTrace();
             }

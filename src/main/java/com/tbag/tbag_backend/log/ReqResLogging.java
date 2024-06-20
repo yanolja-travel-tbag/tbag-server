@@ -82,7 +82,7 @@ public class ReqResLogging {
     public ReqResLogging(String traceId, String httpMethod, String uri,
                          Map<String, Object> params,
                          String logTime, String serverIp, String deviceType,
-                         Object requestBody, Object responseBody, String elapsedTime, String jwtToken) {
+                         Object requestBody, Object responseBody, String elapsedTime) {
         this.traceId = traceId;
         this.httpMethod = httpMethod;
         this.uri = uri;
@@ -93,7 +93,6 @@ public class ReqResLogging {
         this.requestBody = requestBody;
         this.responseBody = responseBody;
         this.elapsedTime = elapsedTime;
-        this.jwtToken = jwtToken;
     }
 
 }
