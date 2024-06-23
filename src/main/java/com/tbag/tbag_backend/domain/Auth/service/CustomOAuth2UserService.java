@@ -16,7 +16,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -37,10 +38,18 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
-        saveOrUpdate(registrationId, attributes);
+        User user = saveOrUpdate(registrationId, attributes);
+
+        Collection<SimpleGrantedAuthority> authorities;
+        if (user.getIsRegistered()) {
+            authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        } else {
+            authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_GUEST"));
+        }
+
 
         return new DefaultOAuth2User(
-                Arrays.asList(new SimpleGrantedAuthority("ROLE_USER")),
+                authorities,
                 attributes.getAttributes(),
                 attributes.getNameAttributeKey());
     }

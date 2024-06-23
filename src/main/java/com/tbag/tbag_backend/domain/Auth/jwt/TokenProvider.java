@@ -19,7 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -29,10 +28,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -41,7 +40,6 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 public class TokenProvider implements
         InitializingBean {
 
-    public static final String AUTHORITIES = "auth";
     private final String secret;
     private SecretKey key;
 
@@ -104,7 +102,6 @@ public class TokenProvider implements
                 .setExpiration(accessExpiration)
                 .claim("userId", user.getId())
                 .signWith(key, SignatureAlgorithm.HS512)
-                .claim("authorities", authorities)
                 .compact();
 
         String refreshToken = Jwts.builder()
@@ -114,7 +111,6 @@ public class TokenProvider implements
                 .setExpiration(refreshExpiration)
                 .claim("userId", user.getId())
                 .signWith(key, SignatureAlgorithm.HS512)
-                .claim("authorities", authorities)
                 .compact();
 
         updateUserAndStoreRefreshToken(user, refreshToken);
@@ -142,10 +138,12 @@ public class TokenProvider implements
         User user = userRepository.findOneByIdAndIsActivatedIsTrue(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_TOKEN, "User not found"));
 
-        Collection<SimpleGrantedAuthority> authorities = Stream.of(
-                        String.valueOf(claims.get(AUTHORITIES)).split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        Collection<SimpleGrantedAuthority> authorities;
+        if (user.getIsRegistered()) {
+            authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        } else {
+            authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_GUEST"));
+        }
 
         UserDetails userDetails = UserPrincipal.create(user, authorities);
 
@@ -162,7 +160,7 @@ public class TokenProvider implements
         } catch (SecurityException | MalformedJwtException | IllegalArgumentException e) {
             throw new CustomException(ErrorCode.INVALID_TOKEN, "invalid token " + e);
         } catch (ExpiredJwtException e) {
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED, "expired token " + e);
+            throw new CustomException(ErrorCode.INVALID_TOKEN, "expired token " + e);
         } catch (UnsupportedJwtException e) {
             throw new CustomException(ErrorCode.INVALID_TOKEN, "token not supported " + e);
         }

@@ -21,21 +21,20 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/{userId}/update-registration")
-    public ResponseEntity<Void> updateUserRegistrationStatus(@PathVariable Integer userId, @RequestBody UserRegistrationRequest request) {
-        userService.updateUserRegistrationStatus(userId, request.getPreferredGenres(), request.getPreferredArtists());
+    public ResponseEntity<Void> updateUserRegistrationStatus(@PathVariable Integer userId, @RequestBody UserRegistrationRequest request, Principal principal) {
+        userService.updateUserRegistrationStatus(userId, request.getPreferredGenres(), request.getPreferredArtists(), principal);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> getUserInfo(Principal principal) {
-        Integer userId = Integer.parseInt(principal.getName());
-        UserDto userDto = userService.getUserInfo(userId);
+        UserDto userDto = userService.getUserInfo(principal);
         return ResponseEntity.ok(userDto);
     }
 
     @PostMapping("/{userId}/deactivate")
-    public ResponseEntity<Void> deactivateUser(@PathVariable Integer userId) {
-        userService.deactivateUser(userId);
+    public ResponseEntity<Void> deactivateUser(@PathVariable Integer userId, Principal principal) {
+        userService.deactivateUser(userId, principal);
         return ResponseEntity.ok().build();
     }
 

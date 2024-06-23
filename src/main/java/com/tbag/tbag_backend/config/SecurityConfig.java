@@ -61,8 +61,11 @@ public class SecurityConfig {
                 .antMatchers("/", "/exception/**", "/error", "/favicon.ico",
                         "/auth/login", "/auth/signup",
                         "/oauth2/**",
-                        "/public/**").permitAll()
-                .anyRequest().authenticated()
+                        "/public/**")
+                .permitAll()
+                .antMatchers("/user/*/update-registration", "/user/*/deactivate","/genres", "/artists")
+                .hasAnyRole("USER", "GUEST")
+                .anyRequest().hasRole("USER")
                 .and()
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new RefreshFilter(tokenProvider, redisTemplate), JwtFilter.class)

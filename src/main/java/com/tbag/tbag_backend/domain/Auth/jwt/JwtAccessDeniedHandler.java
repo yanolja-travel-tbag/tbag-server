@@ -17,6 +17,6 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
   @Override
   public void handle(HttpServletRequest request, HttpServletResponse response,
       AccessDeniedException accessDeniedException) throws IOException, ServletException {
-    throw new CustomException(ErrorCode.INVALID_AUTHORITY, "Required privilege does not exist.");
+    throw new CustomException(ErrorCode.INVALID_AUTHORITY, "Required privilege does not exist. Need to register");
   }
 }

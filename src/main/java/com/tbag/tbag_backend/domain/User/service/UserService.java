@@ -30,6 +30,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -52,8 +53,16 @@ public class UserService {
     private String unlinkUrl;
 
     @Transactional
-    public void updateUserRegistrationStatus(Integer userId, List<PreferredGenreRequest> preferredGenres, List<PreferredArtistRequest> preferredArtists) {
+    public void updateUserRegistrationStatus(Integer userId, List<PreferredGenreRequest> preferredGenres, List<PreferredArtistRequest> preferredArtists, Principal principal) {
+        if (userId != Integer.parseInt(principal.getName())){
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"토큰 인증 정보와 userId 일치하지 않음");
+        }
+
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND,"User not found"));
+
+        if (user.getIsRegistered()){
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"이미 회원가입한 유저입니다.");
+        }
 
         for (PreferredGenreRequest preferredGenre : preferredGenres) {
             for (Long genreId : preferredGenre.getGenreIds()) {
@@ -86,7 +95,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserDto getUserInfo(Integer userId) {
+    public UserDto getUserInfo(Principal principal) {
+        Integer userId = Integer.parseInt(principal.getName());
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND,"User not found"));
 
         Map<String, List<UserPreferredGenreDto>> preferredGenres = userPreferredGenreRepository.findByUser(user).stream()
@@ -128,7 +138,10 @@ public class UserService {
 
 
     @Transactional
-    public void deactivateUser(Integer userId) {
+    public void deactivateUser(Integer userId, Principal principal) {
+        if (userId != Integer.parseInt(principal.getName())){
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"토큰 인증 정보와 userId 일치하지 않음");
+        }
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND,"User not found"));
         revoke(user);
     }

@@ -15,7 +15,7 @@ public class OAuthController {
     @GetMapping("/redirect")
     public String handleOAuth2Redirect(@RequestParam(required = false) String error) {
         if (error != null && !error.isEmpty()) {
-            throw new CustomException(ErrorCode.INVALID_AUTHORITY, error);
+            throw new CustomException(ErrorCode.SERVER_ERROR, error);
         }
         return "";
     }
