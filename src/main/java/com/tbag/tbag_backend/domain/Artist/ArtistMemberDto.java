@@ -1,6 +1,5 @@
 package com.tbag.tbag_backend.domain.Artist;
 
-import com.tbag.tbag_backend.common.LocalizedNameDto;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,10 +8,10 @@ import lombok.Data;
 class ArtistMemberDto {
 
     private Long id;
-    private LocalizedNameDto name;
+    private String name;
     private String profileImage;
 
-    public ArtistMemberDto(Long id, LocalizedNameDto name, String profileImage) {
+    public ArtistMemberDto(Long id, String name, String profileImage) {
         this.id = id;
         this.name = name;
         this.profileImage = profileImage;

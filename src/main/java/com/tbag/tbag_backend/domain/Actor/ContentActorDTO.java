@@ -1,20 +1,19 @@
 package com.tbag.tbag_backend.domain.Actor;
 
-import com.tbag.tbag_backend.common.LocalizedNameDto;
 import lombok.Data;
 
 @Data
 public class ContentActorDTO {
     private Long contentId;
-    private LocalizedNameDto title;
-    private LocalizedNameDto character;
-    private LocalizedNameDto actorName;
+    private String title;
+    private String character;
+    private String actorName;
     private String posterPath;
     private Long viewCount;
-    private LocalizedNameDto mediaType;
+    private String mediaType;
 
 
-    public ContentActorDTO(Long contentId, LocalizedNameDto title, LocalizedNameDto character, LocalizedNameDto actorName, String posterPath, Long viewCount, LocalizedNameDto mediaType) {
+    public ContentActorDTO(Long contentId, String title, String character, String actorName, String posterPath, Long viewCount, String mediaType) {
         this.contentId = contentId;
         this.title = title;
         this.character = character;

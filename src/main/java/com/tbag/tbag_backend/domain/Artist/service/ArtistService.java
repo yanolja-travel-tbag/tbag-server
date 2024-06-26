@@ -1,6 +1,6 @@
 package com.tbag.tbag_backend.domain.Artist.service;
 
-import com.tbag.tbag_backend.common.LocalizedNameDto;
+import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.domain.Artist.Artist;
 import com.tbag.tbag_backend.domain.Artist.ArtistSearchDto;
 import com.tbag.tbag_backend.domain.Artist.ArtistMember;
@@ -23,7 +23,7 @@ public class ArtistService {
 
 
     public Page<ArtistSearchDto> searchArtistsByKeyword(String keyword, Pageable pageable) {
-        Page<ArtistMember> artistMembers = artistMemberRepository.searchMembersByKeyword(keyword, pageable);
+        Page<ArtistMember> artistMembers = artistMemberRepository.searchMembersByKeyword(keyword, Language.ofLocale(), pageable);
         return artistMembers.map(this::convertToDTO);
     }
 
@@ -31,12 +31,8 @@ public class ArtistService {
         ArtistSearchDto artistSearchDto = new ArtistSearchDto();
         Artist artist = artistMember.getArtist();
         artistSearchDto.setId(artist.getId());
-        artistSearchDto.setName(LocalizedNameDto.builder()
-                .eng(artist.getNameEng())
-                .kor(artist.getNameKor())
-                .build());
+        artistSearchDto.setName(artist.getName());
         artistSearchDto.setProfileImage(artist.getImage());
-
         artistSearchDto.setMember(artistMember);
 
         return artistSearchDto;

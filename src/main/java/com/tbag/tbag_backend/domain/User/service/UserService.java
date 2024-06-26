@@ -1,6 +1,5 @@
 package com.tbag.tbag_backend.domain.User.service;
 
-import com.tbag.tbag_backend.common.LocalizedNameDto;
 import com.tbag.tbag_backend.domain.Artist.Artist;
 import com.tbag.tbag_backend.domain.Artist.repository.ArtistRepository;
 import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.dto.PreferredArtistRequest;
@@ -103,20 +102,14 @@ public class UserService {
                 .map(upg -> UserPreferredGenreDto.builder()
                         .mediaType(upg.getId().getMediaType())
                         .genreId(upg.getGenre().getId())
-                        .genreName(LocalizedNameDto.builder()
-                                .eng(upg.getGenre().getNameEng() != null ? upg.getGenre().getNameEng() : "")
-                                .kor(upg.getGenre().getNameKor() != null ? upg.getGenre().getNameKor() : "")
-                                .build())
+                        .genreName(upg.getGenre().getName())
                         .build())
                 .collect(Collectors.groupingBy(UserPreferredGenreDto::getMediaType));
 
         List<UserPreferredArtistDto> preferredArtists = userPreferredArtistRepository.findByUser(user).stream()
                 .map(upa -> UserPreferredArtistDto.builder()
                         .artistId(upa.getArtist().getId())
-                        .artistName(LocalizedNameDto.builder()
-                                .eng(upa.getArtist().getNameEng() != null ? upa.getArtist().getNameEng() : "")
-                                .kor(upa.getArtist().getNameKor() != null ? upa.getArtist().getNameKor() : "")
-                                .build())
+                        .artistName(upa.getArtist().getName())
                         .build())
                 .collect(Collectors.toList());
 

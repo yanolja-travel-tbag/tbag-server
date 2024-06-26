@@ -10,10 +10,10 @@ import org.springframework.data.repository.query.Param;
 public interface ArtistRepository extends JpaRepository<Artist, Long> {
 
     @Query("SELECT DISTINCT a FROM Artist a LEFT JOIN a.artistMembers am " +
-            "WHERE LOWER(a.nameEng) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(a.nameKor) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(am.nameEng) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(am.nameKor) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "WHERE LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(a.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(am.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(am.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Artist> searchArtistsByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
 }

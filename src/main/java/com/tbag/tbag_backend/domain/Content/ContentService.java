@@ -1,6 +1,7 @@
 package com.tbag.tbag_backend.domain.Content;
 
-import com.tbag.tbag_backend.common.LocalizedNameDto;
+import com.tbag.tbag_backend.common.Translate;
+import com.tbag.tbag_backend.common.TranslationService;
 import com.tbag.tbag_backend.domain.Content.contentArtist.ContentArtist;
 import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
@@ -20,8 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.tbag.tbag_backend.common.LocalizedNameDto.mapToLocalizedNameDto;
-
 @Service
 @RequiredArgsConstructor
 public class ContentService {
@@ -32,6 +31,7 @@ public class ContentService {
     private final ContentGenreRepository contentGenreRepository;
     private final LocationImageRepository locationImageRepository;
     private final ContentArtistRepository contentArtistRepository;
+    private final TranslationService translationService;
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
     public Page<ContentSearchDto> searchContent(String keyword, Pageable pageable) {
@@ -40,8 +40,10 @@ public class ContentService {
         return contents.map(content -> getContentSearchDto(content));
     }
 
+    @Translate
     public ContentSearchDto getContentById(Long contentId) {
         Content content = contentRepository.findById(contentId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Content not found"));
+        content = translationService.getTranslatedEntity(content);
 
         return getContentSearchDto(content);
     }
@@ -51,17 +53,17 @@ public class ContentService {
 
         List<ContentSearchDto.ActorDto> actors = content.getContentActors().stream()
                 .map(contentActor -> ContentSearchDto.ActorDto.builder()
-                        .name(mapToLocalizedNameDto(contentActor.getActor().getName(), contentActor.getActor().getOriginalName()))
-                        .character(mapToLocalizedNameDto(contentActor.getCharacterEng(), contentActor.getCharacter()))
+                        .name(contentActor.getActor().getName())
+                        .character(contentActor.getCharacterEng())
                         .profilePath(imageBaseUrl+contentActor.getActor().getProfilePath())
                         .build())
                 .collect(Collectors.toList());
 
         List<String> contentImages = new ArrayList<>();
-        List<LocalizedNameDto> contentGenres;
+        List<String> contentGenres;
 
         contentGenres = contentGenreRepository.findByContentId(content.getId()).stream()
-                .map(genre -> mapToLocalizedNameDto(genre.getGenre().getNameEng(), genre.getGenre().getNameKor()))
+                .map(genre -> genre.getGenre().getName())
                 .collect(Collectors.toList());
 
         if (contentDetails.getPosterPath() != null) {
@@ -71,10 +73,12 @@ public class ContentService {
             contentImages.add(imageBaseUrl + contentDetails.getBackdropPath());
         }
 
+        content = translationService.getTranslatedEntity(content);
+
 
         return ContentSearchDto.builder()
                 .id(content.getId())
-                .title(mapToLocalizedNameDto(content.getTitleEng(), content.getTitle()))
+                .title(content.getTitle())
                 .viewCount(content.getViewCount())
                 .genres(contentGenres)
                 .actors(actors)
@@ -94,7 +98,7 @@ public class ContentService {
         LocationImage image = locationImageRepository.findFirstByContentLocationOrderByIdAsc(location);
         Content content = location.getContent();
         ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
-        List<LocalizedNameDto> contentGenres = new ArrayList<>();
+        List<String> contentGenres = new ArrayList<>();
         List<String> contentImages = new ArrayList<>();
 
         if ("artist".equalsIgnoreCase(content.getMediaType())) {
@@ -106,7 +110,7 @@ public class ContentService {
             if (contentDetails != null) {
 
                 contentGenres = contentGenreRepository.findByContentId(content.getId()).stream()
-                        .map(genre -> mapToLocalizedNameDto(genre.getGenre().getNameEng(), genre.getGenre().getNameKor()))
+                        .map(genre -> genre.getGenre().getName())
                         .collect(Collectors.toList());
 
                 if (contentDetails.getPosterPath() != null) {
@@ -120,19 +124,19 @@ public class ContentService {
 
         return ContentLocationDetailDto.builder()
                 .id(location.getId())
-                .placeName(mapToLocalizedNameDto(location.getPlaceNameEng(), location.getPlaceName()))
-                .placeDescription(mapToLocalizedNameDto(location.getPlaceDescriptionEng(), location.getPlaceDescription()))
-                .businessHours(mapToLocalizedNameDto(location.getBusinessHoursEng(), location.getBusinessHours()))
-                .holiday(mapToLocalizedNameDto(location.getHolidayEng(), location.getHoliday()))
-                .locationString(mapToLocalizedNameDto(location.getLocationStringEng(), location.getLocationString()))
-                .placeType(mapToLocalizedNameDto(location.getPlaceTypeEng(), location.getPlaceType()))
+                .placeName(location.getPlaceName())
+                .placeDescription(location.getPlaceDescription())
+                .businessHours(location.getBusinessHours())
+                .holiday(location.getHoliday())
+                .locationString(location.getLocationString())
+                .placeType(location.getPlaceType())
                 .latitude(location.getLatitude())
                 .longitude(location.getLongitude())
                 .phoneNumber(location.getPhoneNumber())
                 .createdAt(location.getCreatedAt())
                 .viewCount(location.getViewCount())
                 .image(image != null ? mapToLocationImageDto(image) : null)
-                .contentTitle(mapToLocalizedNameDto(content.getTitleEng(), content.getTitle()))
+                .contentTitle(content.getTitle())
                 .contentGenres(contentGenres)
                 .contentImages(contentImages)
                 .build();

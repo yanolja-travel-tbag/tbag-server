@@ -1,6 +1,5 @@
 package com.tbag.tbag_backend.domain.Location.service;
 
-import com.tbag.tbag_backend.common.LocalizedNameDto;
 import com.tbag.tbag_backend.domain.Content.*;
 import com.tbag.tbag_backend.domain.Content.contentArtist.ContentArtist;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -52,7 +50,7 @@ public class ContentLocationService {
         LocationImage image = locationImageRepository.findFirstByContentLocationOrderByIdAsc(location);
         Content content = location.getContent();
         ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
-        List<LocalizedNameDto> contentGenres = new ArrayList<>();
+        List<String> contentGenres = new ArrayList<>();
         List<String> contentImages = new ArrayList<>();
 
         if ("artist".equalsIgnoreCase(content.getMediaType())) {
@@ -64,7 +62,7 @@ public class ContentLocationService {
             if (contentDetails != null) {
 
                 contentGenres = contentGenreRepository.findByContentId(content.getId()).stream()
-                        .map(genre -> mapToLocalizedNameDto(genre.getGenre().getNameEng(), genre.getGenre().getNameKor()))
+                        .map(genre -> genre.getGenre().getName())
                         .collect(Collectors.toList());
 
                 if (contentDetails.getPosterPath() != null) {
@@ -78,31 +76,24 @@ public class ContentLocationService {
 
         return ContentLocationDetailDto.builder()
                 .id(location.getId())
-                .placeName(mapToLocalizedNameDto(location.getPlaceNameEng(), location.getPlaceName()))
-                .placeDescription(mapToLocalizedNameDto(location.getPlaceDescriptionEng(), location.getPlaceDescription()))
-                .businessHours(mapToLocalizedNameDto(location.getBusinessHoursEng(), location.getBusinessHours()))
-                .holiday(mapToLocalizedNameDto(location.getHolidayEng(), location.getHoliday()))
-                .locationString(mapToLocalizedNameDto(location.getLocationStringEng(), location.getLocationString()))
-                .placeType(mapToLocalizedNameDto(location.getPlaceTypeEng(), location.getPlaceType()))
+                .placeName(location.getPlaceName())
+                .placeDescription(location.getPlaceDescription())
+                .businessHours(location.getBusinessHours())
+                .holiday(location.getHoliday())
+                .locationString(location.getLocationString())
+                .placeType(location.getPlaceType())
                 .latitude(location.getLatitude())
                 .longitude(location.getLongitude())
                 .phoneNumber(location.getPhoneNumber())
                 .createdAt(location.getCreatedAt())
                 .viewCount(location.getViewCount())
                 .image(image != null ? mapToLocationImageDto(image) : null)
-                .contentTitle(mapToLocalizedNameDto(content.getTitleEng(), content.getTitle()))
+                .contentTitle(content.getTitle())
                 .contentGenres(contentGenres)
                 .contentImages(contentImages)
                 .build();
     }
 
-
-    private LocalizedNameDto mapToLocalizedNameDto(String eng, String kor) {
-        return LocalizedNameDto.builder()
-                .eng(eng)
-                .kor(kor)
-                .build();
-    }
 
     private LocationImageDto mapToLocationImageDto(LocationImage image) {
         return LocationImageDto.builder()

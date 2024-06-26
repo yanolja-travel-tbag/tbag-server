@@ -1,6 +1,5 @@
 package com.tbag.tbag_backend.domain.Location.service;
 
-import com.tbag.tbag_backend.common.LocalizedNameDto;
 import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDto;
 import com.tbag.tbag_backend.domain.Location.dto.MapContentLocationDto;
 import com.tbag.tbag_backend.domain.Location.dto.MarkerLocationDto;
@@ -73,9 +72,9 @@ public class PublicContentLocationService {
 
         return ContentLocationDto.builder()
                 .id(contentLocation.getId())
-                .placeName(mapToLocalizedNameDto(contentLocation.getPlaceNameEng(), contentLocation.getPlaceName()))
-                .businessHours(mapToLocalizedNameDto(contentLocation.getBusinessHoursEng(), contentLocation.getBusinessHours()))
-                .locationString(mapToLocalizedNameDto(contentLocation.getLocationStringEng(), contentLocation.getLocationString()))
+                .placeName(contentLocation.getPlaceName())
+                .businessHours(contentLocation.getBusinessHours())
+                .locationString(contentLocation.getLocationString())
                 .placeType(contentLocation.getPlaceType())
                 .viewCount(contentLocation.getViewCount())
                 .image(imageDto)
@@ -85,7 +84,7 @@ public class PublicContentLocationService {
     private MapContentLocationDto mapToMapContentLocationDto(MapContentLocationProjection projection) {
         return MapContentLocationDto.builder()
                 .id(projection.getId())
-                .contentTitle(mapToLocalizedNameDto(projection.getContentTitleEng(), projection.getContentTitle()))
+                .contentTitle(projection.getContentTitle())
                 .type(projection.getContentMediaType())
                 .latitude(projection.getLatitude())
                 .longitude(projection.getLongitude())
@@ -97,8 +96,8 @@ public class PublicContentLocationService {
 
         return MarkerLocationDto.builder()
                 .id(location.getId())
-                .placeName(mapToLocalizedNameDto(location.getPlaceNameEng(), location.getPlaceName()))
-                .locationString(mapToLocalizedNameDto(location.getLocationStringEng(), location.getLocationString()))
+                .placeName(location.getPlaceName())
+                .locationString(location.getLocationString())
                 .placeType(location.getPlaceType())
                 .latitude(location.getLatitude())
                 .longitude(location.getLongitude())
@@ -106,12 +105,6 @@ public class PublicContentLocationService {
                 .build();
     }
 
-    private LocalizedNameDto mapToLocalizedNameDto(String eng, String kor) {
-        return LocalizedNameDto.builder()
-                .eng(eng)
-                .kor(kor)
-                .build();
-    }
 
     private LocationImageDto mapToLocationImageDto(LocationImage image) {
         return LocationImageDto.builder()

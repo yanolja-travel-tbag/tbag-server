@@ -18,7 +18,7 @@ public interface ContentLocationRepository extends JpaRepository<ContentLocation
 
     List<ContentLocation> findTop5ByContentMediaTypeOrderByCreatedAtDesc(String mediaType);
 
-    @Query("SELECT cl.id as id, c.title as contentTitle, c.titleEng as contentTitleEng, cl.content.mediaType as contentMediaType, cl.latitude as latitude, cl.longitude as longitude " +
+    @Query("SELECT cl.id as id, c.title as contentTitle, c.title as contentTitleEng, cl.content.mediaType as contentMediaType, cl.latitude as latitude, cl.longitude as longitude " +
             "FROM ContentLocation cl JOIN cl.content c WHERE (:mediaType = 'all' OR c.mediaType = :mediaType)")
     List<MapContentLocationProjection> findByMediaType(String mediaType);
 
@@ -37,9 +37,9 @@ public interface ContentLocationRepository extends JpaRepository<ContentLocation
     @Query("SELECT cl FROM ContentLocation cl WHERE " +
             "LOWER(cl.placeName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(cl.locationString) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(cl.placeNameEng) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(cl.locationStringEng) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(cl.placeTypeEng) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "LOWER(cl.placeName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(cl.locationString) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(cl.placeType) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<ContentLocation> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     Page<ContentLocation> findByLocationStringContaining(String locationString, Pageable pageable);

@@ -1,37 +1,41 @@
 package com.tbag.tbag_backend.domain.Actor;
 
+import com.tbag.tbag_backend.common.Language;
+import com.tbag.tbag_backend.common.TranslationService;
+import com.tbag.tbag_backend.domain.Content.Content;
+import com.tbag.tbag_backend.domain.Content.ContentDetails;
 import com.tbag.tbag_backend.domain.Content.contentActor.ContentActor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import static com.tbag.tbag_backend.common.LocalizedNameDto.getLocalizedMediaType;
-import static com.tbag.tbag_backend.common.LocalizedNameDto.mapToLocalizedNameDto;
-
 @Service
 @RequiredArgsConstructor
 public class ActorService {
 
     private final ContentActorRepository contentActorRepository;
+    private final TranslationService translationService;
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
 
     public Page<ContentActorDTO> searchActorsByKeyword(String keyword, Pageable pageable) {
-        Page<ContentActor> contentActors = contentActorRepository.findByActor_NameContainingOrActor_OriginalNameContaining(keyword, keyword, pageable);
+        Page<ContentActor> contentActors = contentActorRepository.findByTranslatedActorName(keyword, Language.ofLocale(), pageable);
         return contentActors.map(this::convertToDTO);
     }
 
     private ContentActorDTO convertToDTO(ContentActor contentActor) {
+        Content content = translationService.getTranslatedEntity(contentActor.getContent());
+        Actor actor = translationService.getTranslatedEntity(contentActor.getActor());
+        ContentDetails contentDetails = translationService.getTranslatedEntity(content.getContentDetails());
         return new ContentActorDTO(
-                contentActor.getContent().getId(),
-                mapToLocalizedNameDto(contentActor.getContent().getTitle(), contentActor.getContent().getTitleEng()),
-                mapToLocalizedNameDto(contentActor.getCharacter(), contentActor.getCharacterEng()),
-                mapToLocalizedNameDto(contentActor.getActor().getName(),contentActor.getActor().getOriginalName()),
-                imageBaseUrl + contentActor.getContent().getContentDetails().getPosterPath(),
-                contentActor.getContent().getViewCount(),
-                getLocalizedMediaType(contentActor.getContent().getMediaType())
+                content.getId(),
+                contentActor.getContent().getTitle(),
+                contentActor.getCharacter(),
+                actor.getName(),
+                imageBaseUrl + contentDetails.getPosterPath(),
+                content.getViewCount(),
+                content.getMediaType()
         );
     }
 }

@@ -1,34 +1,32 @@
 package com.tbag.tbag_backend.domain.Content;
 
+import com.tbag.tbag_backend.common.Language;
+import com.tbag.tbag_backend.common.Translatable;
+import com.tbag.tbag_backend.common.TranslatableField;
+import com.tbag.tbag_backend.common.TranslationId;
 import com.tbag.tbag_backend.domain.Content.contentActor.ContentActor;
 import com.tbag.tbag_backend.domain.Content.contentGenre.ContentGenre;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
-@Getter
-@Table(name = "content")
-@NoArgsConstructor
-public class Content {
 
+@Entity
+@Table(name = "content")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Content implements Translatable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "media_type", nullable = false)
     private String mediaType;
-
-    @Column(name = "title", nullable = false)
+    private Long viewCount;
     private String title;
-
-    @Column(name = "title_eng", nullable = false)
-    private String titleEng;
-
-    @Column(name = "view_count", nullable = false)
-    private Long viewCount = 0L;
 
     @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
     private List<ContentGenre> contentGenres;
@@ -38,5 +36,25 @@ public class Content {
 
     @OneToOne(mappedBy = "content", fetch = FetchType.LAZY)
     private ContentDetails contentDetails;
+
+    @Override
+    public List<TranslatableField> getTranslatableFields() {
+        return List.of(new TranslatableField() {
+            @Override
+            public String getTranslationKey() {
+                return "content_title_" + id;
+            }
+
+            @Override
+            public TranslationId getTranslationId() {
+                return new TranslationId(getTranslationKey(), Language.ofLocale());
+            }
+
+            @Override
+            public void setTranslatedValue(String translatedValue) {
+                title = translatedValue;
+            }
+        });
+    }
 }
 

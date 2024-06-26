@@ -1,17 +1,23 @@
 package com.tbag.tbag_backend.domain.Artist;
 
-import com.tbag.tbag_backend.common.LocalizedNameDto;
+import com.tbag.tbag_backend.common.Language;
+import com.tbag.tbag_backend.common.Translatable;
+import com.tbag.tbag_backend.common.TranslatableField;
+import com.tbag.tbag_backend.common.TranslationId;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Table(name = "idol_members")
 @NoArgsConstructor
-public class ArtistMember {
+public class ArtistMember implements Translatable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,26 +29,47 @@ public class ArtistMember {
     @JoinColumn(name = "artist_id", nullable = false)
     private Artist artist;
 
-    @Transient
-    private LocalizedNameDto name;
-
-    @JsonIgnore
-    @Column(name = "name_eng", nullable = true)
-    private String nameEng;
-
-    @JsonIgnore
-    @Column(name = "name", nullable = false)
-    private String nameKor;
+    private String name;
 
     @Column(name = "profile_image", nullable = true)
     private String profileImage;
 
-    @PostLoad
-    private void postLoad() {
-        this.name = LocalizedNameDto.builder()
-                .eng(this.nameEng)
-                .kor(this.nameKor)
-                .build();
+    @Override
+    @JsonIgnore
+    public List<TranslatableField> getTranslatableFields() {
+        List<TranslatableField> fields = new ArrayList<>();
+        fields.add(new SimpleTranslatableField(name, "artist_member_name_" + id));
+        return fields;
+    }
+
+    private static class SimpleTranslatableField implements TranslatableField {
+        private String value;
+        private final String key;
+
+        SimpleTranslatableField(String value, String key) {
+            this.value = value;
+            this.key = key;
+        }
+
+        @Override
+        public String getTranslationKey() {
+            return key;
+        }
+
+        @Override
+        public TranslationId getTranslationId() {
+            return new TranslationId(key, Language.ofLocale());
+        }
+
+        @Override
+        public void setTranslatedValue(String translatedValue) {
+            this.value = translatedValue;
+        }
+
+        public String getValue() {
+            return value;
+        }
     }
 }
+
 
