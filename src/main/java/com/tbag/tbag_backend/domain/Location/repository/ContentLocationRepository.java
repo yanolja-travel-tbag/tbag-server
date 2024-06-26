@@ -5,13 +5,14 @@ import com.tbag.tbag_backend.domain.Location.projection.MapContentLocationProjec
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ContentLocationRepository extends JpaRepository<ContentLocation, Long> {
+public interface ContentLocationRepository extends JpaRepository<ContentLocation, Long>, JpaSpecificationExecutor<ContentLocation> {
 
     List<ContentLocation> findTop5ByContentMediaTypeOrderByViewCountDesc(String mediaType);
 
@@ -40,5 +41,7 @@ public interface ContentLocationRepository extends JpaRepository<ContentLocation
             "LOWER(cl.locationStringEng) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(cl.placeTypeEng) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<ContentLocation> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    Page<ContentLocation> findByLocationStringContaining(String locationString, Pageable pageable);
 
 }

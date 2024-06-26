@@ -1,11 +1,13 @@
 package com.tbag.tbag_backend.domain.Location.entity;
 
 import com.tbag.tbag_backend.domain.Content.Content;
+import com.tbag.tbag_backend.domain.Location.locationImage.LocationImage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -75,6 +77,9 @@ public class ContentLocation {
 
     @Column(name = "location_string_eng", columnDefinition = "VARCHAR(255)")
     private String locationStringEng;
+
+    @OneToMany(mappedBy = "contentLocation", fetch = FetchType.LAZY)
+    private List<LocationImage> locationImages;
 
     public void updateViewCount() {
         this.viewCount++;

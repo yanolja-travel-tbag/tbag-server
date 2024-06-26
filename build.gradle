@@ -103,6 +103,16 @@ dependencies {
     // cache
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'com.github.ben-manes.caffeine:caffeine:2.9.1'
+
+    implementation 'com.google.maps:google-maps-services:0.17.0'
+    implementation 'com.google.maps.android:android-maps-utils:0.5'
+    implementation 'junit:junit:4.12'
+
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation 'org.json:json:20220320'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.11.2'
+
 }
 
 tasks.named('test') {
