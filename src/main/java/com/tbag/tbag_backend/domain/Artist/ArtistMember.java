@@ -34,7 +34,6 @@ public class ArtistMember {
     @Column(name = "name", nullable = false)
     private String nameKor;
 
-    @JsonIgnore
     @Column(name = "profile_image", nullable = true)
     private String profileImage;
 

@@ -1,7 +1,6 @@
 package com.tbag.tbag_backend.domain.Content;
 
 import com.tbag.tbag_backend.common.LocalizedNameDto;
-import com.tbag.tbag_backend.domain.Actor.ContentSearchDto;
 import com.tbag.tbag_backend.domain.Content.contentArtist.ContentArtist;
 import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
@@ -20,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.tbag.tbag_backend.common.LocalizedNameDto.mapToLocalizedNameDto;
 
 @Service
 @RequiredArgsConstructor
@@ -78,14 +79,6 @@ public class ContentService {
                 .genres(contentGenres)
                 .actors(actors)
                 .contentImages(contentImages)
-                .build();
-    }
-
-
-    private LocalizedNameDto mapToLocalizedNameDto(String eng, String kor) {
-        return LocalizedNameDto.builder()
-                .eng(eng)
-                .kor(kor)
                 .build();
     }
 

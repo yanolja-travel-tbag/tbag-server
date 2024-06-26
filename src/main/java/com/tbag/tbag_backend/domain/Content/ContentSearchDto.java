@@ -1,4 +1,4 @@
-package com.tbag.tbag_backend.domain.Actor;
+package com.tbag.tbag_backend.domain.Content;
 
 import com.tbag.tbag_backend.common.LocalizedNameDto;
 import lombok.Builder;

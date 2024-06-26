@@ -1,8 +1,14 @@
 package com.tbag.tbag_backend.domain.Artist.service;
 
+import com.tbag.tbag_backend.common.LocalizedNameDto;
 import com.tbag.tbag_backend.domain.Artist.Artist;
+import com.tbag.tbag_backend.domain.Artist.ArtistSearchDto;
+import com.tbag.tbag_backend.domain.Artist.ArtistMember;
+import com.tbag.tbag_backend.domain.Artist.repository.ArtistMemberRepository;
 import com.tbag.tbag_backend.domain.Artist.repository.ArtistRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +19,28 @@ import java.util.List;
 public class ArtistService {
 
     private final ArtistRepository artistRepository;
+    private final ArtistMemberRepository artistMemberRepository;
+
+
+    public Page<ArtistSearchDto> searchArtistsByKeyword(String keyword, Pageable pageable) {
+        Page<ArtistMember> artistMembers = artistMemberRepository.searchMembersByKeyword(keyword, pageable);
+        return artistMembers.map(this::convertToDTO);
+    }
+
+    private ArtistSearchDto convertToDTO(ArtistMember artistMember) {
+        ArtistSearchDto artistSearchDto = new ArtistSearchDto();
+        Artist artist = artistMember.getArtist();
+        artistSearchDto.setId(artist.getId());
+        artistSearchDto.setName(LocalizedNameDto.builder()
+                .eng(artist.getNameEng())
+                .kor(artist.getNameKor())
+                .build());
+        artistSearchDto.setProfileImage(artist.getImage());
+
+        artistSearchDto.setMember(artistMember);
+
+        return artistSearchDto;
+    }
 
     @Transactional(readOnly = true)
     public List<Artist> getAllArtists() {

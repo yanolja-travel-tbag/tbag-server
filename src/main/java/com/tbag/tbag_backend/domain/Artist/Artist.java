@@ -7,6 +7,8 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Table(name = "artist")
@@ -32,6 +34,9 @@ public class Artist {
     @JsonIgnore
     @Column(name = "image", nullable = true)
     private String image;
+
+    @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
+    private List<ArtistMember> artistMembers;
 
     @PostLoad
     private void postLoad() {
