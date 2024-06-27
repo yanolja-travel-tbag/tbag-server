@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/content")
@@ -21,7 +24,14 @@ public class ContentController {
     public Page<ContentLocationDetailDto> getRelatedLocations(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return contentService.getRelatedLocations(id, page, size);
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "recent") String sort) {
+        return contentService.getRelatedLocations(id, page, size, sort);
     }
+
+    @GetMapping("/recommended")
+    public List<ContentSimpleDto> getRecommendedContents(@RequestParam(defaultValue = "10") int limit, Principal principal) {
+        return contentService.getRecommendedContents(principal, limit);
+    }
+
 }

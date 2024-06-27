@@ -1,6 +1,5 @@
 package com.tbag.tbag_backend.domain.Content;
 
-import com.tbag.tbag_backend.common.*;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,14 +12,14 @@ public class ContentSearchDto {
     private String title;
     private Long viewCount;
     private List<String> genres;
-    private List<ActorDto> actors;
+    private List<MemberDto> members;
     private List<String> contentImages;
 
     @Getter
     @Builder
-    public static class ActorDto {
+    public static class MemberDto {
         private String name;
-        private String character;
+        private String stageName;
         private String profilePath;
     }
 }

@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,22 +54,13 @@ public class ContentLocationService {
 
         if ("artist".equalsIgnoreCase(content.getMediaType())) {
             ContentArtist contentArtist = contentArtistRepository.findOneByContentId(content.getId());
-            if (contentArtist.getArtist().getImage() != null) {
-                contentImages.add(contentArtist.getArtist().getImage());
+            if (contentArtist.getArtist().getProfileImage() != null) {
+                contentImages.add(contentArtist.getArtist().getProfileImage());
             }
         } else {
             if (contentDetails != null) {
 
-                contentGenres = contentGenreRepository.findByContentId(content.getId()).stream()
-                        .map(genre -> genre.getGenre().getName())
-                        .collect(Collectors.toList());
-
-                if (contentDetails.getPosterPath() != null) {
-                    contentImages.add(imageBaseUrl + contentDetails.getPosterPath());
-                }
-                if (contentDetails.getBackdropPath() != null) {
-                    contentImages.add(imageBaseUrl + contentDetails.getBackdropPath());
-                }
+                contentGenres = ContentService.getGenresAndImages(content, contentDetails, contentImages, contentGenreRepository, imageBaseUrl);
             }
         }
 

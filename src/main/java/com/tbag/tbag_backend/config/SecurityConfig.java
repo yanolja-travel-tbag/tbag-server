@@ -64,7 +64,8 @@ public class SecurityConfig {
                 .antMatchers("/", "/exception/**", "/error", "/favicon.ico",
                         "/auth/login", "/auth/signup",
                         "/oauth2/**",
-                        "/public/**")
+                        "/public/**",
+                        "/genres")
                 .permitAll()
                 .antMatchers("/user/*/update-registration", "/user/*/deactivate","/genres", "/artists")
                 .hasAnyRole("USER", "GUEST")

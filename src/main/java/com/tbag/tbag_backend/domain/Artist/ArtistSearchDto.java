@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class ArtistSearchDto {
-    private Long id;
-    private String name;
+    private Long contentId;
+    private String artistName;
     private String profileImage;
     private ArtistMember member;
 

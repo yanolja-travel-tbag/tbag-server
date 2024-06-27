@@ -5,6 +5,7 @@ import com.tbag.tbag_backend.common.Translatable;
 import com.tbag.tbag_backend.common.TranslatableField;
 import com.tbag.tbag_backend.common.TranslationId;
 import com.tbag.tbag_backend.domain.Content.contentActor.ContentActor;
+import com.tbag.tbag_backend.domain.Content.contentArtist.ContentArtist;
 import com.tbag.tbag_backend.domain.Content.contentGenre.ContentGenre;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +31,9 @@ public class Content implements Translatable {
 
     @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
     private List<ContentGenre> contentGenres;
+
+    @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
+    private List<ContentArtist> contentArtists;
 
     @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
     private List<ContentActor> contentActors;

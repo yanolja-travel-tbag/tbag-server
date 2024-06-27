@@ -28,8 +28,8 @@ public class Artist implements Translatable {
     private String name;
 
     @JsonIgnore
-    @Column(name = "image", nullable = true)
-    private String image;
+    @Column(name = "profile_image", nullable = true)
+    private String profileImage;
 
     @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
     private List<ArtistMember> artistMembers;

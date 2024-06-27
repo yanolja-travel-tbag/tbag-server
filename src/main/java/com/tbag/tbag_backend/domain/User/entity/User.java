@@ -1,7 +1,9 @@
 package com.tbag.tbag_backend.domain.User.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.entity.UserPreferredArtist;
 import com.tbag.tbag_backend.domain.Auth.Enum.SocialType;
+import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.entity.UserPreferredGenre;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -51,6 +54,12 @@ public class User {
 
     @Column(name = "last_accessed")
     private LocalDateTime lastAccessed;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<UserPreferredGenre> userPreferredGenres;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<UserPreferredArtist> userPreferredArtists;
 
     @Builder
     public User(String nickname, String socialId, SocialType socialType) {

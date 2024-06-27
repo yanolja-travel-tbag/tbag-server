@@ -30,9 +30,7 @@ public interface ContentLocationRepository extends JpaRepository<ContentLocation
             "ORDER BY (CASE WHEN cl.placeType = :placeType THEN 0 ELSE 1 END), cl.viewCount DESC")
     Page<ContentLocation> findRecommendedLocations(@Param("contentId") Long contentId, @Param("placeType") String placeType, @Param("currentId") Long currentId, Pageable pageable);
 
-    @Query("SELECT cl FROM ContentLocation cl WHERE cl.content.id = :contentId " +
-            "ORDER BY cl.viewCount DESC")
-    Page<ContentLocation> findRelatedLocations(@Param("contentId") Long contentId, Pageable pageable);
+    Page<ContentLocation> findByContentId(Long contentId, Pageable pageable);
 
     @Query("SELECT cl FROM ContentLocation cl WHERE " +
             "LOWER(cl.placeName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
@@ -41,7 +39,5 @@ public interface ContentLocationRepository extends JpaRepository<ContentLocation
             "LOWER(cl.locationString) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(cl.placeType) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<ContentLocation> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
-
-    Page<ContentLocation> findByLocationStringContaining(String locationString, Pageable pageable);
 
 }
