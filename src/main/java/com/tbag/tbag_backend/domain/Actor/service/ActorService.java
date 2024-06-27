@@ -1,7 +1,10 @@
-package com.tbag.tbag_backend.domain.Actor;
+package com.tbag.tbag_backend.domain.Actor.service;
 
 import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.common.TranslationService;
+import com.tbag.tbag_backend.domain.Content.contentActor.ContentActorRepository;
+import com.tbag.tbag_backend.domain.Content.contentActor.ContentActorDto;
+import com.tbag.tbag_backend.domain.Actor.entity.Actor;
 import com.tbag.tbag_backend.domain.Content.Content;
 import com.tbag.tbag_backend.domain.Content.ContentDetails;
 import com.tbag.tbag_backend.domain.Content.contentActor.ContentActor;
@@ -19,16 +22,16 @@ public class ActorService {
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
 
-    public Page<ContentActorDTO> searchActorsByKeyword(String keyword, Pageable pageable) {
+    public Page<ContentActorDto> searchActorsByKeyword(String keyword, Pageable pageable) {
         Page<ContentActor> contentActors = contentActorRepository.findByTranslatedActorName(keyword, Language.ofLocale(), pageable);
         return contentActors.map(this::convertToDTO);
     }
 
-    private ContentActorDTO convertToDTO(ContentActor contentActor) {
+    private ContentActorDto convertToDTO(ContentActor contentActor) {
         Content content = translationService.getTranslatedEntity(contentActor.getContent());
         Actor actor = translationService.getTranslatedEntity(contentActor.getActor());
         ContentDetails contentDetails = translationService.getTranslatedEntity(content.getContentDetails());
-        return new ContentActorDTO(
+        return new ContentActorDto(
                 content.getId(),
                 contentActor.getContent().getTitle(),
                 contentActor.getCharacter(),

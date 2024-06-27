@@ -6,9 +6,9 @@ import lombok.Getter;
 @Getter
 @Builder
 public class MapContentLocationDto {
-    private Long id;
+    private Long locationId;
     private String contentTitle;
-    private String type;
+    private String contentMediaType;
     private Double latitude;
     private Double longitude;
 }

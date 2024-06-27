@@ -4,7 +4,7 @@ import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.common.Translatable;
 import com.tbag.tbag_backend.common.TranslatableField;
 import com.tbag.tbag_backend.common.TranslationId;
-import com.tbag.tbag_backend.domain.Actor.Actor;
+import com.tbag.tbag_backend.domain.Actor.entity.Actor;
 import com.tbag.tbag_backend.domain.Content.Content;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

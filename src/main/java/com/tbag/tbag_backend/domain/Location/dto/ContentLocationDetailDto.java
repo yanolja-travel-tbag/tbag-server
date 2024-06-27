@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Builder
 public class ContentLocationDetailDto {
-    private Long id;
+    private Long locationId;
     private String placeName;
     private String placeDescription;
     private String businessHours;

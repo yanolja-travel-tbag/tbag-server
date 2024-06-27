@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @Builder
 public class ContentSearchDto {
-    private Long id;
+    private Long contentId;
     private String title;
     private Long viewCount;
     private List<String> genres;

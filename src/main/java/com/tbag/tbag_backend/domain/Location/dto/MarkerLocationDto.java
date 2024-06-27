@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class MarkerLocationDto {
-    private Long id;
+    private Long locationId;
     private String placeName;
     private String locationString;
     private String placeType;

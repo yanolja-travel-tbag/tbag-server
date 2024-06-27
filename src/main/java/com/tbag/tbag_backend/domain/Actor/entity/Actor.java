@@ -1,4 +1,4 @@
-package com.tbag.tbag_backend.domain.Actor;
+package com.tbag.tbag_backend.domain.Actor.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tbag.tbag_backend.common.Language;

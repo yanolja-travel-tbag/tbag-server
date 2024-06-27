@@ -1,5 +1,7 @@
-package com.tbag.tbag_backend.domain.Actor;
+package com.tbag.tbag_backend.domain.Actor.controller;
 
+import com.tbag.tbag_backend.domain.Content.contentActor.ContentActorDto;
+import com.tbag.tbag_backend.domain.Actor.service.ActorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,11 +20,11 @@ public class PublicActorController {
 
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ContentActorDTO>> searchCelebs(
+    public ResponseEntity<Page<ContentActorDto>> searchCelebs(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<ContentActorDTO> results = actorService.searchActorsByKeyword(keyword, PageRequest.of(page, size));
+        Page<ContentActorDto> results = actorService.searchActorsByKeyword(keyword, PageRequest.of(page, size));
         return ResponseEntity.ok(results);
     }
 

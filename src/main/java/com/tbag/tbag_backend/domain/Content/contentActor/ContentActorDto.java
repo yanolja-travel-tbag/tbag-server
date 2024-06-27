@@ -1,9 +1,9 @@
-package com.tbag.tbag_backend.domain.Actor;
+package com.tbag.tbag_backend.domain.Content.contentActor;
 
 import lombok.Data;
 
 @Data
-public class ContentActorDTO {
+public class ContentActorDto {
     private Long contentId;
     private String title;
     private String character;
@@ -13,7 +13,7 @@ public class ContentActorDTO {
     private String mediaType;
 
 
-    public ContentActorDTO(Long contentId, String title, String character, String actorName, String posterPath, Long viewCount, String mediaType) {
+    public ContentActorDto(Long contentId, String title, String character, String actorName, String posterPath, Long viewCount, String mediaType) {
         this.contentId = contentId;
         this.title = title;
         this.character = character;

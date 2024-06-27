@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ContentLocationDto {
-    private Long id;
+    private Long locationId;
     private String placeName;
     private String businessHours;
     private String locationString;

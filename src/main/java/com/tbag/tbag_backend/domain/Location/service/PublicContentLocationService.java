@@ -71,7 +71,7 @@ public class PublicContentLocationService {
         }
 
         return ContentLocationDto.builder()
-                .id(contentLocation.getId())
+                .locationId(contentLocation.getId())
                 .placeName(contentLocation.getPlaceName())
                 .businessHours(contentLocation.getBusinessHours())
                 .locationString(contentLocation.getLocationString())
@@ -83,9 +83,9 @@ public class PublicContentLocationService {
 
     private MapContentLocationDto mapToMapContentLocationDto(MapContentLocationProjection projection) {
         return MapContentLocationDto.builder()
-                .id(projection.getId())
+                .locationId(projection.getId())
                 .contentTitle(projection.getContentTitle())
-                .type(projection.getContentMediaType())
+                .contentMediaType(projection.getContentMediaType())
                 .latitude(projection.getLatitude())
                 .longitude(projection.getLongitude())
                 .build();
@@ -95,7 +95,7 @@ public class PublicContentLocationService {
         LocationImage image = locationImageRepository.findFirstByContentLocationOrderByIdAsc(location);
 
         return MarkerLocationDto.builder()
-                .id(location.getId())
+                .locationId(location.getId())
                 .placeName(location.getPlaceName())
                 .locationString(location.getLocationString())
                 .placeType(location.getPlaceType())

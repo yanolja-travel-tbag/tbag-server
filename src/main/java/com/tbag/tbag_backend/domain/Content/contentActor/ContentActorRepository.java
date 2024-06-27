@@ -1,4 +1,4 @@
-package com.tbag.tbag_backend.domain.Actor;
+package com.tbag.tbag_backend.domain.Content.contentActor;
 
 import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.domain.Content.contentActor.ContentActor;

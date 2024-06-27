@@ -112,7 +112,7 @@ public class ContentService {
 
 
         return ContentSearchDto.builder()
-                .id(content.getId())
+                .contentId(content.getId())
                 .title(content.getTitle())
                 .viewCount(content.getViewCount())
                 .genres(contentGenres)
@@ -177,7 +177,7 @@ public class ContentService {
         }
 
         return ContentLocationDetailDto.builder()
-                .id(location.getId())
+                .locationId(location.getId())
                 .placeName(location.getPlaceName())
                 .placeDescription(location.getPlaceDescription())
                 .businessHours(location.getBusinessHours())
