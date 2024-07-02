@@ -28,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.util.ArrayList;
@@ -58,9 +59,17 @@ public class ContentService {
         return contents.map(content -> getContentSearchDto(content));
     }
 
+    @Transactional
+    public void updateViewCount(Long contentId) {
+        Content content = contentRepository.findById(contentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Content not found with id: " + contentId));
+        content.setViewCount(content.getViewCount() + 1);
+        contentRepository.save(content);
+    }
+
     @Translate
     public ContentSearchDto getContentById(Long contentId) {
-        Content content = contentRepository.findById(contentId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Content not found"));
+        Content content = contentRepository.findById(contentId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Content not found with id:" + contentId));
 
         return getContentSearchDto(content);
     }
