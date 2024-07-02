@@ -114,6 +114,7 @@ public class ContentService {
         return ContentSearchDto.builder()
                 .contentId(content.getId())
                 .title(content.getTitle())
+                .mediaType(content.getMediaType())
                 .viewCount(content.getViewCount())
                 .genres(contentGenres)
                 .members(members)

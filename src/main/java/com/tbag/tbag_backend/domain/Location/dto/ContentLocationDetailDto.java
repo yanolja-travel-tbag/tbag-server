@@ -18,6 +18,7 @@ public class ContentLocationDetailDto {
     private String holiday;
     private String locationString;
     private String placeType;
+    private String mediaType;
     private Double latitude;
     private Double longitude;
     private String phoneNumber;

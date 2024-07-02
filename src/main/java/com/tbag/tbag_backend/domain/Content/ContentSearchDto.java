@@ -10,6 +10,7 @@ import java.util.List;
 public class ContentSearchDto {
     private Long contentId;
     private String title;
+    private String mediaType;
     private Long viewCount;
     private List<String> genres;
     private List<MemberDto> members;

@@ -72,6 +72,7 @@ public class ContentLocationService {
                 .holiday(location.getHoliday())
                 .locationString(location.getLocationString())
                 .placeType(location.getPlaceType())
+                .mediaType(content.getMediaType())
                 .latitude(location.getLatitude())
                 .longitude(location.getLongitude())
                 .phoneNumber(location.getPhoneNumber())

@@ -63,6 +63,7 @@ public class ContentLocation implements Translatable {
     @Column(name = "location_string", columnDefinition = "VARCHAR(255)")
     private String locationString;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "contentLocation", fetch = FetchType.LAZY)
     private List<LocationImage> locationImages;
 
