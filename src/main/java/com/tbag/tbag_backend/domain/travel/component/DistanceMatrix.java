@@ -66,23 +66,17 @@ public class DistanceMatrix {
         return rows.getJSONObject(0).getJSONArray("elements").getJSONObject(0);
     }
 
-    private TravelSegmentResponse createTravelSegment(int order, JSONObject response, Long originWaypointId, Long destWaypointId) {
+    private TravelSegmentResponse createTravelSegment(int order, JSONObject response, Long originWaypointId) {
         TravelSegmentResponse segment = new TravelSegmentResponse();
 
         TravelSegmentResponse.LocationDTO origin = createLocationDTO(originWaypointId, response, true);
 
+        segment.setWaypointId(originWaypointId);
         segment.setOrigin(origin);
 
         JSONObject elements = getDistanceElements(response);
-        TravelSegmentResponse.DistanceDTO distance = new TravelSegmentResponse.DistanceDTO();
-        distance.setText(elements.getJSONObject("distance").getString("text"));
-        distance.setValue(elements.getJSONObject("distance").getInt("value"));
-        segment.setDistance(distance);
-
-        TravelSegmentResponse.DurationDTO duration = new TravelSegmentResponse.DurationDTO();
-        duration.setText(elements.getJSONObject("duration").getString("text"));
-        duration.setValue(elements.getJSONObject("duration").getInt("value"));
-        segment.setDuration(duration);
+        segment.setDistance(elements.getJSONObject("distance").getInt("value"));
+        segment.setDuration(elements.getJSONObject("duration").getInt("value"));
 
         segment.setOrder(order);
 
@@ -147,13 +141,13 @@ public class DistanceMatrix {
             Long destWaypointId = waypointIds.get(destinationIndex);
 
             JSONObject response = distanceResponses[originIndex][destinationIndex];
-            TravelSegmentResponse segment = createTravelSegment(i + 1, response, originWaypointId, destWaypointId);
+            TravelSegmentResponse segment = createTravelSegment(i + 1, response, originWaypointId);
 
             segments.add(segment);
             updateWaypoint(originWaypointId, destWaypointId, segment, i);
 
-            totalDistance += segment.getDistance().getValue();
-            totalDuration += segment.getDuration().getValue();
+            totalDistance += segment.getDistance();
+            totalDuration += segment.getDuration();
         }
 
         TravelRouteResponse result = new TravelRouteResponse();
@@ -171,8 +165,8 @@ public class DistanceMatrix {
         originWaypoint.setDestLocation(waypointRepository.findById(destWaypointId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Destination Waypoint not found"))
                 .getOriginLocation());
-        originWaypoint.setDistance(segment.getDistance().getValue());
-        originWaypoint.setDuration(segment.getDuration().getValue());
+        originWaypoint.setDistance(segment.getDistance());
+        originWaypoint.setDuration(segment.getDuration());
 
         waypointRepository.save(originWaypoint);
     }

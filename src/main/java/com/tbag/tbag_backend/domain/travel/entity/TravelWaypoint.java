@@ -2,9 +2,12 @@ package com.tbag.tbag_backend.domain.travel.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
+import com.tbag.tbag_backend.domain.travel.dto.TravelSegmentResponse;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -48,6 +51,49 @@ public class TravelWaypoint {
         this.duration = duration;
     }
 
+    public static TravelSegmentResponse toResponse(TravelWaypoint travelWaypoint) {
+        if (travelWaypoint == null) {
+            return null;
+        }
+
+        TravelSegmentResponse response = new TravelSegmentResponse();
+        response.setWaypointId(travelWaypoint.getId());
+        response.setOrder(travelWaypoint.getSequence());
+
+        TravelSegmentResponse.LocationDTO origin = new TravelSegmentResponse.LocationDTO();
+        if (travelWaypoint.getOriginLocation() != null) {
+            origin.setLocationId(travelWaypoint.getOriginLocation().getId());
+            origin.setPlaceName(travelWaypoint.getOriginLocation().getPlaceName());
+            origin.setLatitude(travelWaypoint.getOriginLocation().getLatitude());
+            origin.setLongitude(travelWaypoint.getOriginLocation().getLongitude());
+            origin.setAddresses(travelWaypoint.getOriginLocation().getLocationString());
+
+            if (travelWaypoint.getOriginLocation().getLocationImages() != null &&
+                    !travelWaypoint.getOriginLocation().getLocationImages().isEmpty()) {
+                origin.setImage(travelWaypoint.getOriginLocation().getLocationImages().get(0).getImageUrl());
+            } else {
+                origin.setImage(null);
+            }
+        }
+        response.setOrigin(origin);
+        response.setDistance(travelWaypoint.getDistance());
+        response.setDuration(travelWaypoint.getDuration());
+
+        return response;
+    }
+
+    public static List<TravelSegmentResponse> toResponseList(List<TravelWaypoint> travelWaypoints) {
+        if (travelWaypoints == null) {
+            return null;
+        }
+
+        List<TravelSegmentResponse> responses = new ArrayList<>();
+        for (TravelWaypoint travelWaypoint : travelWaypoints) {
+            responses.add(toResponse(travelWaypoint));
+        }
+
+        return responses;
+    }
 
 }
 

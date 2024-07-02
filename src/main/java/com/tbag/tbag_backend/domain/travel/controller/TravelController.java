@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.security.Principal;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -18,6 +20,11 @@ import java.util.concurrent.ExecutionException;
 public class TravelController {
 
     private final TravelService travelService;
+
+    @GetMapping("")
+    public List<TravelRequest> getTravelRequests(Principal principal) {
+        return travelService.getTravelRequests(principal);
+    }
 
     @PostMapping("/request")
     public TravelRequest createTravelRequest(@RequestBody TravelRequestDto travelRequestDto) {
@@ -28,12 +35,28 @@ public class TravelController {
                 travelRequestDto.getEndDate()
         );
     }
+
+    @GetMapping("/request/{id}")
+    public TravelRouteResponse getTravelRequestById(@PathVariable Long id) {
+        return travelService.getTravelRequestById(id);
+    }
+
+    @DeleteMapping("/request/{id}")
+    public void deleteTravelRequest(@PathVariable Long id) {
+        travelService.deleteTravelRequest(id);
+    }
+
     @PostMapping("/waypoint")
     public void addWaypoint(@RequestBody TravelWaypointDto travelWaypointDto) {
         travelService.addWaypoint(
                 travelWaypointDto.getTravelRequestId(),
                 travelWaypointDto.getLocationId()
         );
+    }
+
+    @DeleteMapping("/waypoint/{id}")
+    public void deleteTravelWaypoint(@PathVariable Long id) {
+        travelService.deleteTravelWaypoint(id);
     }
 
     @GetMapping("/optimize/{travelRequestId}")

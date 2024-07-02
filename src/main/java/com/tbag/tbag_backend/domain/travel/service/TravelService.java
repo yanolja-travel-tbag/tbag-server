@@ -6,6 +6,7 @@ import com.tbag.tbag_backend.domain.User.entity.User;
 import com.tbag.tbag_backend.domain.User.repository.UserRepository;
 import com.tbag.tbag_backend.domain.travel.component.DistanceMatrix;
 import com.tbag.tbag_backend.domain.travel.dto.TravelRouteResponse;
+import com.tbag.tbag_backend.domain.travel.dto.TravelSegmentResponse;
 import com.tbag.tbag_backend.domain.travel.entity.TravelRequest;
 import com.tbag.tbag_backend.domain.travel.entity.TravelWaypoint;
 import com.tbag.tbag_backend.domain.travel.repository.TravelRequestRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +48,25 @@ public class TravelService {
         return travelRequestRepository.save(travelRequest);
     }
 
+    public TravelRouteResponse getTravelRequestById(Long travelRequestId) {
+        List<TravelWaypoint> travelWaypoints = travelWaypointRepository.findByTravelRequestId(travelRequestId);
+        List<TravelSegmentResponse> segmentResponses = TravelWaypoint.toResponseList(travelWaypoints);
+
+        long totalDistance = segmentResponses.stream()
+                .mapToLong(TravelSegmentResponse::getDistance)
+                .sum();
+        long totalDuration = segmentResponses.stream()
+                .mapToLong(TravelSegmentResponse::getDuration)
+                .sum();
+
+        TravelRouteResponse travelRouteResponse = new TravelRouteResponse();
+        travelRouteResponse.setSegments(segmentResponses);
+        travelRouteResponse.setTotalDistance(totalDistance);
+        travelRouteResponse.setTotalDuration(totalDuration);
+
+        return travelRouteResponse;
+    }
+
     @Transactional
     public void addWaypoint(Long travelRequestId, Long locationId) {
         TravelRequest travelRequest = travelRequestRepository.findById(travelRequestId)
@@ -54,11 +75,19 @@ public class TravelService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found"));
         List<TravelWaypoint> travelWaypoints = travelWaypointRepository.findByTravelRequestId(travelRequestId);
 
-        TravelWaypoint.builder()
+        boolean locationExists = travelWaypoints.stream()
+                .anyMatch(waypoint -> waypoint.getOriginLocation().getId().equals(locationId));
+        if (locationExists) {
+            throw new CustomException(ErrorCode.DUPLICATED_DATA, "The location is already present in the travel request.");
+        }
+
+        TravelWaypoint newWaypoint = TravelWaypoint.builder()
                 .travelRequest(travelRequest)
                 .originLocation(location)
-                .sequence(travelWaypoints.size()+1)
+                .sequence(travelWaypoints.size() + 1)
                 .build();
+
+        travelWaypointRepository.save(newWaypoint);
     }
 
     public TravelRouteResponse optimizeRoute(Long travelRequestId) throws IOException, ExecutionException, InterruptedException {
@@ -88,4 +117,23 @@ public class TravelService {
         travelWaypointRepository.saveAll(waypoints);
         return waypoints;
     }
+
+    public void deleteTravelWaypoint(Long id) {
+        travelWaypointRepository.deleteById(id);
+    }
+
+    public List<TravelRequest> getTravelRequests(Principal principal) {
+        Integer userId = Integer.parseInt(principal.getName());
+
+        return travelRequestRepository.findByUserId(userId);
+    }
+
+    @Transactional
+    public void deleteTravelRequest(Long id) {
+        if (!travelRequestRepository.existsById(id)) {
+            throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Travel request not found");
+        }
+        travelRequestRepository.deleteById(id);
+    }
+
 }

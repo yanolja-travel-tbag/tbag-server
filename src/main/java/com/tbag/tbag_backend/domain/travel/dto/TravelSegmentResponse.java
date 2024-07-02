@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class TravelSegmentResponse {
+    private long waypointId;
     private int order;
     private LocationDTO origin;
-//    private LocationDTO destination;
-    private DistanceDTO distance;
-    private DurationDTO duration;
+    private long distance;
+    private long duration;
 
     @Data
     public static class LocationDTO {
@@ -18,17 +18,5 @@ public class TravelSegmentResponse {
         private Double latitude;
         private Double longitude;
         private String addresses;
-    }
-
-    @Data
-    public static class DistanceDTO {
-        private String text;
-        private long value;
-    }
-
-    @Data
-    public static class DurationDTO {
-        private String text;
-        private long value;
     }
 }

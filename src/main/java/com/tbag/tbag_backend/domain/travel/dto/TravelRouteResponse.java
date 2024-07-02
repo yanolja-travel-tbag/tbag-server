@@ -6,6 +6,6 @@ import java.util.List;
 @Data
 public class TravelRouteResponse {
     private List<TravelSegmentResponse> segments;
-    private int totalDistance;
-    private int totalDuration;
+    private long totalDistance;
+    private long totalDuration;
 }
