@@ -8,6 +8,8 @@ public class ArtistSearchDto {
     private String artistName;
     private String profileImage;
     private ArtistMember member;
+    private long viewCount;
+    private String mediaType;
 
 }
 

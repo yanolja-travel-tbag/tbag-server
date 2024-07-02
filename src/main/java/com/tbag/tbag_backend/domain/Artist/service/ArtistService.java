@@ -38,6 +38,8 @@ public class ArtistService {
         artistSearchDto.setArtistName(artist.getName());
         artistSearchDto.setProfileImage(artist.getProfileImage());
         artistSearchDto.setMember(artistMember);
+        artistSearchDto.setViewCount(contentArtist.getContent().getViewCount());
+        artistSearchDto.setMediaType(contentArtist.getContent().getMediaType());
 
         return artistSearchDto;
     }
