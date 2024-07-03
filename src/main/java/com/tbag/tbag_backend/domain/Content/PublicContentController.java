@@ -41,4 +41,9 @@ public class PublicContentController {
         return contentService.getTop5ByViewCount(mediaType);
     }
 
+    @GetMapping("/recommended")
+    public List<ContentSimpleDto> getRecommendedContents(@RequestParam(defaultValue = "10") int limit) {
+        return contentService.getRecommendedContents(limit);
+    }
+
 }

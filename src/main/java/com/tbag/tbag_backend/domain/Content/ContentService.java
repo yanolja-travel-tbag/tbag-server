@@ -285,4 +285,14 @@ public class ContentService {
                 .collect(Collectors.toList());
     }
 
+    public List<ContentSimpleDto> getRecommendedContents(int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+
+        List<Content> recommendedContents = contentRepository.findAllOrderByViewCountDesc(pageable);
+
+        return recommendedContents.stream()
+                .map(content -> getFilteredContentDto(content, content.getMediaType()))
+                .collect(Collectors.toList());
+    }
+
 }
