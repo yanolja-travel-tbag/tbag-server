@@ -28,5 +28,7 @@ public class ContentLocationDetailDto {
     private String contentTitle;
     private List<String> contentGenres;
     private List<String> contentImages;
+    private Boolean isInSchedule;
+
 }
 

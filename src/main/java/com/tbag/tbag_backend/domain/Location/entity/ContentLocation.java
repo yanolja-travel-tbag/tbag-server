@@ -7,6 +7,7 @@ import com.tbag.tbag_backend.common.TranslatableField;
 import com.tbag.tbag_backend.common.TranslationId;
 import com.tbag.tbag_backend.domain.Content.Content;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImage;
+import com.tbag.tbag_backend.domain.travel.entity.TravelWaypoint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -67,8 +68,20 @@ public class ContentLocation implements Translatable {
     @OneToMany(mappedBy = "contentLocation", fetch = FetchType.LAZY)
     private List<LocationImage> locationImages;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "originLocation", fetch = FetchType.LAZY)
+    private List<TravelWaypoint> travelWaypoints;
+
     public void updateViewCount() {
         this.viewCount++;
+    }
+
+    public boolean isInSchedule(Integer userId) {
+        if (userId == null) {
+            return false;
+        }
+        return travelWaypoints.stream()
+                .anyMatch(waypoint -> waypoint.getTravelRequest().getUser().getId().equals(userId));
     }
 
     @Override

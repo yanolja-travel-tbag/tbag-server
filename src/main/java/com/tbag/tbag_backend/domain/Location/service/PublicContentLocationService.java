@@ -26,15 +26,15 @@ public class PublicContentLocationService {
     private final ContentLocationRepository contentLocationRepository;
     private final LocationImageRepository locationImageRepository;
 
-    public List<ContentLocationDto> getTop5ByViewCount(String mediaType) {
+    public List<ContentLocationDto> getTop5ByViewCount(String mediaType, Integer userId) {
         return contentLocationRepository.findTop5ByContentMediaTypeOrderByViewCountDesc(mediaType).stream()
-                .map(this::mapToContentLocationDto)
+                .map(contentLocation -> mapToContentLocationDto(contentLocation, userId))
                 .collect(Collectors.toList());
     }
 
-    public List<ContentLocationDto> getTop5ByCreatedAt(String mediaType) {
+    public List<ContentLocationDto> getTop5ByCreatedAt(String mediaType, Integer userId) {
         return contentLocationRepository.findTop5ByContentMediaTypeOrderByCreatedAtDesc(mediaType).stream()
-                .map(this::mapToContentLocationDto)
+                .map(contentLocation -> mapToContentLocationDto(contentLocation, userId))
                 .collect(Collectors.toList());
     }
 
@@ -63,12 +63,14 @@ public class PublicContentLocationService {
     }
 
 
-    private ContentLocationDto mapToContentLocationDto(ContentLocation contentLocation) {
+    private ContentLocationDto mapToContentLocationDto(ContentLocation contentLocation, Integer userId) {
         LocationImage locationImage = locationImageRepository.findFirstByContentLocationOrderByIdAsc(contentLocation);
         LocationImageDto imageDto = null;
         if (locationImage != null) {
             imageDto = mapToLocationImageDto(locationImage);
         }
+
+        boolean isInSchedule = contentLocation.isInSchedule(userId);
 
         return ContentLocationDto.builder()
                 .locationId(contentLocation.getId())
@@ -78,6 +80,7 @@ public class PublicContentLocationService {
                 .placeType(contentLocation.getPlaceType())
                 .viewCount(contentLocation.getViewCount())
                 .image(imageDto)
+                .isInSchedule(isInSchedule)
                 .build();
     }
 

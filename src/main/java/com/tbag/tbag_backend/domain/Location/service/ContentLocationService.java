@@ -34,18 +34,21 @@ public class ContentLocationService {
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
 
-    public ContentLocationDetailDto getContentLocationById(Long id) {
+    public ContentLocationDetailDto getContentLocationById(Long id, Integer userId) {
         Optional<ContentLocation> locationOptional = contentLocationRepository.findById(id);
         if (locationOptional.isPresent()) {
             ContentLocation location = locationOptional.get();
-            return mapToContentLocationDetailDto(location);
+            return mapToContentLocationDetailDto(location, userId);
         } else {
             throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found");
         }
     }
 
-
     private ContentLocationDetailDto mapToContentLocationDetailDto(ContentLocation location) {
+        return mapToContentLocationDetailDto(location, null);
+    }
+
+    private ContentLocationDetailDto mapToContentLocationDetailDto(ContentLocation location, Integer userId) {
         LocationImage image = locationImageRepository.findFirstByContentLocationOrderByIdAsc(location);
         Content content = location.getContent();
         ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
@@ -59,10 +62,11 @@ public class ContentLocationService {
             }
         } else {
             if (contentDetails != null) {
-
                 contentGenres = ContentService.getGenresAndImages(content, contentDetails, contentImages, contentGenreRepository, imageBaseUrl);
             }
         }
+
+        boolean isInSchedule = location.isInSchedule(userId);
 
         return ContentLocationDetailDto.builder()
                 .locationId(location.getId())
@@ -82,6 +86,7 @@ public class ContentLocationService {
                 .contentTitle(content.getTitle())
                 .contentGenres(contentGenres)
                 .contentImages(contentImages)
+                .isInSchedule(isInSchedule)
                 .build();
     }
 

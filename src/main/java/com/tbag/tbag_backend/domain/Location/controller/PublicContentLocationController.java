@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 @RestController
 @RequiredArgsConstructor
@@ -20,13 +21,15 @@ public class PublicContentLocationController {
     private final ContentLocationService contentLocationService;
 
     @GetMapping("/top-viewed")
-    public List<ContentLocationDto> getTop5ByViewCount(@RequestParam String mediaType) {
-        return publicContentLocationService.getTop5ByViewCount(mediaType);
+    public List<ContentLocationDto> getTop5ByViewCount(@RequestParam String mediaType, Principal principal) {
+        Integer userId = (principal != null) ? Integer.parseInt(principal.getName()) : null;
+        return publicContentLocationService.getTop5ByViewCount(mediaType, userId);
     }
 
     @GetMapping("/latest")
-    public List<ContentLocationDto> getTop5ByCreatedAt(@RequestParam String mediaType) {
-        return publicContentLocationService.getTop5ByCreatedAt(mediaType);
+    public List<ContentLocationDto> getTop5ByCreatedAt(@RequestParam String mediaType, Principal principal) {
+        Integer userId = (principal != null) ? Integer.parseInt(principal.getName()) : null;
+        return publicContentLocationService.getTop5ByCreatedAt(mediaType, userId);
     }
 
     @PostMapping("/increment-view/{id}")
@@ -55,8 +58,9 @@ public class PublicContentLocationController {
 
 
     @GetMapping("/{id}/detailed")
-    public ContentLocationDetailDto getContentLocationDetailById(@PathVariable Long id) {
-        return contentLocationService.getContentLocationById(id);
+    public ContentLocationDetailDto getContentLocationDetailById(@PathVariable Long id, Principal principal) {
+        Integer userId = (principal != null) ? Integer.parseInt(principal.getName()) : null;
+        return contentLocationService.getContentLocationById(id, userId);
     }
 
     @GetMapping("/{id}/recommended")

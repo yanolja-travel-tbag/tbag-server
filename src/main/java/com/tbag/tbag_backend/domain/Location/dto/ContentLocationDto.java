@@ -16,5 +16,6 @@ public class ContentLocationDto {
     private String placeType;
     private Long viewCount;
     private LocationImageDto image;
+    private Boolean isInSchedule;
 }
 
