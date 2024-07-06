@@ -47,10 +47,7 @@ public class ContentService {
     private final GenreRepository genreRepository;
     private final LocationImageRepository locationImageRepository;
     private final ContentArtistRepository contentArtistRepository;
-    private final TranslationService translationService;
     private final UserRepository userRepository;
-    private final UserPreferredGenreRepository userPreferredGenreRepository;
-    private final UserPreferredArtistRepository userPreferredArtistRepository;
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
 
@@ -84,7 +81,7 @@ public class ContentService {
 
         List<ContentSearchDto.MemberDto> members = null;
 
-        if (content.getMediaType().equals(MediaType.ARTIST)) {
+        if (content.isMediaTypeArtist()) {
 
             Artist artist = contentArtistRepository.findOneByContentId(content.getId()).getArtist();
 
@@ -157,7 +154,7 @@ public class ContentService {
         List<String> contentGenres = new ArrayList<>();
         List<String> contentImages = new ArrayList<>();
 
-        if (content.getMediaType().equals(MediaType.ARTIST)) {
+        if (content.isMediaTypeArtist()) {
             ContentArtist contentArtist = contentArtistRepository.findOneByContentId(content.getId());
             if (contentArtist.getArtist().getProfileImage() != null) {
                 contentImages.add(contentArtist.getArtist().getProfileImage());
