@@ -57,5 +57,9 @@ public class Content {
         return mediaType.getName(locale);
     }
 
+    public boolean isMediaTypeArtist() {
+        return MediaType.ARTIST.equals(this.mediaType);
+    }
+
 }
 
