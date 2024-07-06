@@ -15,20 +15,6 @@ public class ContentController {
 
     private final ContentService contentService;
 
-    @GetMapping("/{contentId}")
-    public ContentSearchDto getContentById(@PathVariable Long contentId) {
-        return contentService.getContentById(contentId);
-    }
-
-    @GetMapping("/{id}/related-locations")
-    public Page<ContentLocationDetailDto> getRelatedLocations(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "recent") String sort) {
-        return contentService.getRelatedLocations(id, page, size, sort);
-    }
-
     @GetMapping("/recommended")
     public List<ContentSimpleDto> getRecommendedContents(@RequestParam(defaultValue = "10") int limit, Principal principal) {
         return contentService.getRecommendedContents(principal, limit);

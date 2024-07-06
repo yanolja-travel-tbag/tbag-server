@@ -13,18 +13,6 @@ public class ContentLocationController {
 
     private final ContentLocationService contentLocationService;
 
-    @GetMapping("/{id}")
-    public ContentLocationDetailDto getContentLocationById(@PathVariable Long id) {
-        return contentLocationService.getContentLocationById(id);
-    }
-
-    @GetMapping("/{id}/recommended")
-    public Page<ContentLocationDetailDto> getRecommendedContentLocations(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return contentLocationService.getRecommendedContentLocations(id, page, size);
-    }
 
 }
 
