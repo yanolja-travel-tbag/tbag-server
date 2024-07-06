@@ -1,6 +1,7 @@
 package com.tbag.tbag_backend.domain.Artist.controller;
 
 import com.tbag.tbag_backend.domain.Artist.Artist;
+import com.tbag.tbag_backend.domain.Artist.ArtistDto;
 import com.tbag.tbag_backend.domain.Artist.service.ArtistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,7 @@ public class ArtistController {
     private final ArtistService artistService;
 
     @GetMapping
-    public ResponseEntity<List<Artist>> getAllArtists() {
-        List<Artist> artists = artistService.getAllArtists();
-        return ResponseEntity.ok(artists);
+    public List<ArtistDto> getAllArtists() {
+        return artistService.getAllArtists();
     }
 }

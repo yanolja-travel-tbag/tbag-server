@@ -17,18 +17,18 @@ public interface ContentRepository extends JpaRepository<Content, Long>, JpaSpec
 
     @Query("SELECT c FROM Content c JOIN Translation t ON t.translationId.key = CONCAT('content_title_', c.id) " +
             "WHERE t.value LIKE %:title% AND c.mediaType <> :mediaType")
-    Page<Content> findByTitleContainingAndMediaTypeNot(@Param("title") String title, @Param("mediaType") String mediaType, Pageable pageable);
+    Page<Content> findByTitleContainingAndMediaTypeNot(@Param("title") String title, @Param("mediaType") MediaType mediaType, Pageable pageable);
 
     @Query("SELECT c FROM Content c JOIN c.contentGenres cg WHERE c.mediaType = :mediaType AND cg.genre = :genre ORDER BY c.viewCount DESC")
     Page<Content> findByMediaTypeAndGenreOrderByViewCountDesc(
-            @Param("mediaType") String mediaType,
+            @Param("mediaType") MediaType mediaType,
             @Param("genre") Genre genre,
             Pageable pageable
     );
 
-    Page<Content> findByMediaTypeOrderByViewCountDesc(String mediaType, Pageable pageable);
+    Page<Content> findByMediaTypeOrderByViewCountDesc(MediaType mediaType, Pageable pageable);
 
-    List<Content> findTop5ByMediaTypeOrderByViewCountDesc(String mediaType);
+    List<Content> findTop5ByMediaTypeOrderByViewCountDesc(MediaType mediaType);
 
     @Query("SELECT c FROM Content c JOIN c.contentGenres cg JOIN c.contentArtists ca " +
             "WHERE cg.genre IN :genres OR ca.artist IN :artists " +

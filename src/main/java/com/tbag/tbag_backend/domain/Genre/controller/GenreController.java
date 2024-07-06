@@ -1,6 +1,6 @@
 package com.tbag.tbag_backend.domain.Genre.controller;
 
-import com.tbag.tbag_backend.domain.Genre.Genre;
+import com.tbag.tbag_backend.domain.Genre.GenreDto;
 import com.tbag.tbag_backend.domain.Genre.service.GenreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +18,8 @@ public class GenreController {
     private final GenreService genreService;
 
     @GetMapping
-    public ResponseEntity<List<Genre>> getAllGenres() {
-        List<Genre> genres = genreService.getAllGenres();
+    public ResponseEntity<List<GenreDto>> getAllGenres() {
+        List<GenreDto> genres = genreService.getAllGenres();
         return ResponseEntity.ok(genres);
     }
 }

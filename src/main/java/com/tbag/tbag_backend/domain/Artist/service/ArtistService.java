@@ -1,7 +1,7 @@
 package com.tbag.tbag_backend.domain.Artist.service;
 
-import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.domain.Artist.Artist;
+import com.tbag.tbag_backend.domain.Artist.ArtistDto;
 import com.tbag.tbag_backend.domain.Artist.ArtistSearchDto;
 import com.tbag.tbag_backend.domain.Artist.ArtistMember;
 import com.tbag.tbag_backend.domain.Artist.repository.ArtistMemberRepository;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +46,9 @@ public class ArtistService {
     }
 
     @Transactional(readOnly = true)
-    public List<Artist> getAllArtists() {
-        return artistRepository.findAll();
+    public List<ArtistDto> getAllArtists() {
+        return artistRepository.findAll().stream()
+                .map(ArtistDto::toArtistDto)
+                .collect(Collectors.toList());
     }
 }

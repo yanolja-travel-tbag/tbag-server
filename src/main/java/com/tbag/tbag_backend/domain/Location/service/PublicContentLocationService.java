@@ -1,6 +1,7 @@
 package com.tbag.tbag_backend.domain.Location.service;
 
 import com.tbag.tbag_backend.common.Language;
+import com.tbag.tbag_backend.domain.Content.MediaType;
 import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDto;
 import com.tbag.tbag_backend.domain.Location.dto.MapContentLocationDto;
 import com.tbag.tbag_backend.domain.Location.dto.MarkerLocationDto;
@@ -28,13 +29,13 @@ public class PublicContentLocationService {
     private final LocationImageRepository locationImageRepository;
 
     public List<ContentLocationDto> getTop5ByViewCount(String mediaType, Integer userId) {
-        return contentLocationRepository.findTop5ByContentMediaTypeOrderByViewCountDesc(mediaType).stream()
+        return contentLocationRepository.findTop5ByContentMediaTypeOrderByViewCountDesc(MediaType.valueOf(mediaType.toUpperCase())).stream()
                 .map(contentLocation -> mapToContentLocationDto(contentLocation, userId))
                 .collect(Collectors.toList());
     }
 
     public List<ContentLocationDto> getTop5ByCreatedAt(String mediaType, Integer userId) {
-        return contentLocationRepository.findTop5ByContentMediaTypeOrderByCreatedAtDesc(mediaType).stream()
+        return contentLocationRepository.findTop5ByContentMediaTypeOrderByCreatedAtDesc(MediaType.valueOf(mediaType.toUpperCase())).stream()
                 .map(contentLocation -> mapToContentLocationDto(contentLocation, userId))
                 .collect(Collectors.toList());
     }
@@ -49,7 +50,13 @@ public class PublicContentLocationService {
 
     @Cacheable(value = "contentLocations")
     public List<MapContentLocationDto> getContentLocations(String mediaType) {
-        List<MapContentLocationProjection> projections = contentLocationRepository.findByMediaType(mediaType);
+        List<MapContentLocationProjection> projections;
+        if (mediaType.equals("all")){
+            projections = contentLocationRepository.findAllWithLocation();
+        }
+        else{
+            projections = contentLocationRepository.findAllWithLocationByMediaType(MediaType.valueOf(mediaType.toUpperCase()));
+        }
         String localeLanguage = Language.ofLocale().name();
         return projections.stream()
                 .map(projection -> mapToMapContentLocationDto(projection, localeLanguage))

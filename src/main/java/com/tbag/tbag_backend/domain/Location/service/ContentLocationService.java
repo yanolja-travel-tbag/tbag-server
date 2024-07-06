@@ -55,7 +55,7 @@ public class ContentLocationService {
         List<String> contentGenres = new ArrayList<>();
         List<String> contentImages = new ArrayList<>();
 
-        if ("artist".equalsIgnoreCase(content.getMediaType())) {
+        if (content.getMediaType().equals(MediaType.ARTIST)) {
             ContentArtist contentArtist = contentArtistRepository.findOneByContentId(content.getId());
             if (contentArtist.getArtist().getProfileImage() != null) {
                 contentImages.add(contentArtist.getArtist().getProfileImage());

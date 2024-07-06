@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Locale;
 
 
 @Entity
@@ -18,13 +19,15 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class Content {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long viewCount;
 
-    private String mediaType;
+    @Enumerated(EnumType.STRING)
+    private MediaType mediaType;
 
     private String title;
 
@@ -44,6 +47,14 @@ public class Content {
 
     public String getContentTitleKey() {
         return "content_title_" + id;
+    }
+
+    public String getMediaType() {
+        return mediaType.getName(Language.ofLocale().getLocale());
+    }
+
+    public String getMediaType(Locale locale) {
+        return mediaType.getName(locale);
     }
 
 }

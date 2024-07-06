@@ -2,10 +2,8 @@ package com.tbag.tbag_backend.domain.Location.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tbag.tbag_backend.common.Language;
-import com.tbag.tbag_backend.common.Translatable;
-import com.tbag.tbag_backend.common.TranslatableField;
-import com.tbag.tbag_backend.common.TranslationId;
 import com.tbag.tbag_backend.domain.Content.Content;
+import com.tbag.tbag_backend.domain.Location.PlaceType;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImage;
 import com.tbag.tbag_backend.domain.travel.entity.TravelWaypoint;
 import lombok.Getter;
@@ -13,8 +11,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 @Entity
 @Getter
 @Table(name = "content_location")
@@ -42,8 +41,9 @@ public class ContentLocation {
     @Column(name = "phone_number", columnDefinition = "VARCHAR(255)")
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "place_type", columnDefinition = "VARCHAR(255)")
-    private String placeType;
+    private PlaceType placeType;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -91,4 +91,8 @@ public class ContentLocation {
         return "content_location_place_description_" + id;
     }
 
+    public String getPlaceType() {
+        Locale locale = Language.ofLocale().getLocale();
+        return placeType.getName(locale);
+    }
 }

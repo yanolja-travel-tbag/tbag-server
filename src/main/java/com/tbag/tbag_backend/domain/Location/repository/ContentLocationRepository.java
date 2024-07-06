@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.Location.repository;
 
+import com.tbag.tbag_backend.domain.Content.MediaType;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import com.tbag.tbag_backend.domain.Location.projection.MapContentLocationProjection;
 import org.springframework.data.domain.Page;
@@ -14,15 +15,20 @@ import java.util.List;
 @Repository
 public interface ContentLocationRepository extends JpaRepository<ContentLocation, Long>, JpaSpecificationExecutor<ContentLocation> {
 
-    List<ContentLocation> findTop5ByContentMediaTypeOrderByViewCountDesc(String mediaType);
+    List<ContentLocation> findTop5ByContentMediaTypeOrderByViewCountDesc(MediaType mediaType);
 
-    List<ContentLocation> findTop5ByContentMediaTypeOrderByCreatedAtDesc(String mediaType);
+    List<ContentLocation> findTop5ByContentMediaTypeOrderByCreatedAtDesc(MediaType mediaType);
 
     @Query("SELECT cl.id as id, cl.content.title as contentTitle, cl.content.titleEng as contentTitleEng, cl.content.mediaType as contentMediaType, cl.latitude as latitude, cl.longitude as longitude " +
             "FROM ContentLocation cl " +
             "JOIN cl.content c " +
-            "WHERE (:mediaType = 'all' OR c.mediaType = :mediaType)")
-    List<MapContentLocationProjection> findByMediaType(String mediaType);
+            "WHERE (c.mediaType = :mediaType)")
+    List<MapContentLocationProjection> findAllWithLocationByMediaType(@Param("mediaType") MediaType mediaType);
+
+    @Query("SELECT cl.id as id, cl.content.title as contentTitle, cl.content.titleEng as contentTitleEng, cl.content.mediaType as contentMediaType, cl.latitude as latitude, cl.longitude as longitude " +
+            "FROM ContentLocation cl " +
+            "JOIN cl.content c")
+    List<MapContentLocationProjection> findAllWithLocation();
 
     @Query("SELECT cl FROM ContentLocation cl")
     List<ContentLocation> findAll();

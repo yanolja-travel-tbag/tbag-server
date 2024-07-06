@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +55,7 @@ public class ContentService {
     private String imageBaseUrl;
 
     public Page<ContentSearchDto> searchContent(String keyword, Pageable pageable) {
-        Page<Content> contents = contentRepository.findByTitleContainingAndMediaTypeNot(keyword, "artist", pageable);
+        Page<Content> contents = contentRepository.findByTitleContainingAndMediaTypeNot(keyword, MediaType.ARTIST, pageable);
 
         return contents.map(content -> getContentSearchDto(content));
     }
@@ -83,7 +84,7 @@ public class ContentService {
 
         List<ContentSearchDto.MemberDto> members = null;
 
-        if (content.getMediaType().equals("artist")) {
+        if (content.getMediaType().equals(MediaType.ARTIST)) {
 
             Artist artist = contentArtistRepository.findOneByContentId(content.getId()).getArtist();
 
@@ -156,7 +157,7 @@ public class ContentService {
         List<String> contentGenres = new ArrayList<>();
         List<String> contentImages = new ArrayList<>();
 
-        if ("artist".equalsIgnoreCase(content.getMediaType())) {
+        if (content.getMediaType().equals(MediaType.ARTIST)) {
             ContentArtist contentArtist = contentArtistRepository.findOneByContentId(content.getId());
             if (contentArtist.getArtist().getProfileImage() != null) {
                 contentImages.add(contentArtist.getArtist().getProfileImage());
@@ -210,11 +211,11 @@ public class ContentService {
         Page<Content> contents = null;
 
         if (mediaType.equals("artist")) {
-            contents = contentRepository.findByMediaTypeOrderByViewCountDesc(mediaType, pageable);
+            contents = contentRepository.findByMediaTypeOrderByViewCountDesc(MediaType.valueOf(mediaType), pageable);
         } else {
             Genre genre = genreRepository.findById(genreId)
                     .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "genre not found"));
-            contents = contentRepository.findByMediaTypeAndGenreOrderByViewCountDesc(mediaType, genre, pageable);
+            contents = contentRepository.findByMediaTypeAndGenreOrderByViewCountDesc(MediaType.valueOf(mediaType.toUpperCase()), genre, pageable);
         }
 
         return contents.map(content -> getFilteredContentDto(content, mediaType));
@@ -224,7 +225,7 @@ public class ContentService {
 
         String image;
 
-        if (mediaType.equals("artist")) {
+        if (mediaType.toLowerCase().equals("artist")) {
             ContentArtist contentArtist = contentArtistRepository.findOneByContentId(content.getId());
             image = contentArtist.getArtist().getProfileImage();
         } else {
@@ -241,7 +242,7 @@ public class ContentService {
     }
 
     public List<ContentSimpleDto> getTop5ByViewCount(String mediaType) {
-        List<Content> contents = contentRepository.findTop5ByMediaTypeOrderByViewCountDesc(mediaType);
+        List<Content> contents = contentRepository.findTop5ByMediaTypeOrderByViewCountDesc(MediaType.valueOf(mediaType.toUpperCase()));
         return contents.stream()
                 .map(content -> getFilteredContentDto(content, mediaType))
                 .collect(Collectors.toList());
@@ -271,7 +272,7 @@ public class ContentService {
         }
 
         return recommendedContents.stream()
-                .map(content -> getFilteredContentDto(content, content.getMediaType()))
+                .map(content -> getFilteredContentDto(content, content.getMediaType(Locale.ENGLISH)))
                 .collect(Collectors.toList());
     }
 
