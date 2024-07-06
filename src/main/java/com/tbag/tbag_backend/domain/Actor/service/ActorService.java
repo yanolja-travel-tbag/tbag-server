@@ -28,12 +28,12 @@ public class ActorService {
     }
 
     private ContentActorDto convertToDTO(ContentActor contentActor) {
-        Content content = translationService.getTranslatedEntity(contentActor.getContent());
-        Actor actor = translationService.getTranslatedEntity(contentActor.getActor());
-        ContentDetails contentDetails = translationService.getTranslatedEntity(content.getContentDetails());
+        Content content = contentActor.getContent();
+        Actor actor = contentActor.getActor();
+        ContentDetails contentDetails = content.getContentDetails();
         return new ContentActorDto(
                 content.getId(),
-                contentActor.getContent().getTitle(),
+                contentActor.getContent().getContentTitleKey(),
                 contentActor.getCharacter(),
                 actor.getName(),
                 imageBaseUrl + contentDetails.getPosterPath(),

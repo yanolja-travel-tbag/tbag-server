@@ -1,9 +1,6 @@
 package com.tbag.tbag_backend.domain.Content;
 
-import com.tbag.tbag_backend.common.Language;
-import com.tbag.tbag_backend.common.Translatable;
-import com.tbag.tbag_backend.common.TranslatableField;
-import com.tbag.tbag_backend.common.TranslationId;
+import com.tbag.tbag_backend.common.*;
 import com.tbag.tbag_backend.domain.Content.contentActor.ContentActor;
 import com.tbag.tbag_backend.domain.Content.contentArtist.ContentArtist;
 import com.tbag.tbag_backend.domain.Content.contentGenre.ContentGenre;
@@ -20,13 +17,14 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Content implements Translatable {
+public class Content {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String mediaType;
     private Long viewCount;
+
+    private String mediaType;
     private String title;
 
     @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
@@ -41,24 +39,9 @@ public class Content implements Translatable {
     @OneToOne(mappedBy = "content", fetch = FetchType.LAZY)
     private ContentDetails contentDetails;
 
-    @Override
-    public List<TranslatableField> getTranslatableFields() {
-        return List.of(new TranslatableField() {
-            @Override
-            public String getTranslationKey() {
-                return "content_title_" + id;
-            }
-
-            @Override
-            public TranslationId getTranslationId() {
-                return new TranslationId(getTranslationKey(), Language.ofLocale());
-            }
-
-            @Override
-            public void setTranslatedValue(String translatedValue) {
-                title = translatedValue;
-            }
-        });
+    public String getContentTitleKey() {
+        return "content_title_" + id;
     }
+
 }
 

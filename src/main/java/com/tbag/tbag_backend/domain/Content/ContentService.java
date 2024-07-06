@@ -75,7 +75,6 @@ public class ContentService {
     }
 
     private ContentSearchDto getContentSearchDto(Content content) {
-        content = translationService.getTranslatedEntity(content);
 
         ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
 
@@ -116,9 +115,6 @@ public class ContentService {
 
             contentGenres = getGenresAndImages(content, contentDetails, contentImages, contentGenreRepository, imageBaseUrl);
         }
-
-        content = translationService.getTranslatedEntity(content);
-
 
         return ContentSearchDto.builder()
                 .contentId(content.getId())
@@ -231,7 +227,6 @@ public class ContentService {
 
     private ContentSimpleDto getFilteredContentDto(Content content, String mediaType) {
 
-        content = translationService.getTranslatedEntity(content);
         String image;
 
         if (mediaType.equals("artist")) {

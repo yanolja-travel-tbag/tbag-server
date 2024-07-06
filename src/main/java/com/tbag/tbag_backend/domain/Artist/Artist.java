@@ -18,14 +18,14 @@ import java.util.ArrayList;
 @Getter
 @Table(name = "artist")
 @NoArgsConstructor
-public class Artist implements Translatable {
+public class Artist {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String name;
+    private String name = "artist_name_" + id;
 
     @JsonIgnore
     @Column(name = "profile_image", nullable = true)
@@ -34,40 +34,4 @@ public class Artist implements Translatable {
     @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
     private List<ArtistMember> artistMembers;
 
-    @Override
-    @JsonIgnore
-    public List<TranslatableField> getTranslatableFields() {
-        List<TranslatableField> fields = new ArrayList<>();
-        fields.add(new SimpleTranslatableField(name, "artist_name_" + id));
-        return fields;
-    }
-
-    private static class SimpleTranslatableField implements TranslatableField {
-        private String value;
-        private final String key;
-
-        SimpleTranslatableField(String value, String key) {
-            this.value = value;
-            this.key = key;
-        }
-
-        @Override
-        public String getTranslationKey() {
-            return key;
-        }
-
-        @Override
-        public TranslationId getTranslationId() {
-            return new TranslationId(key, Language.ofLocale());
-        }
-
-        @Override
-        public void setTranslatedValue(String translatedValue) {
-            this.value = translatedValue;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
 }

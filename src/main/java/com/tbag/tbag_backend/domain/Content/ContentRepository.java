@@ -14,13 +14,18 @@ import java.util.List;
 
 @Repository
 public interface ContentRepository extends JpaRepository<Content, Long>, JpaSpecificationExecutor<Content> {
-    Page<Content> findByTitleContainingAndMediaTypeNot(String titleEng, String mediaType, Pageable pageable);
+
+    @Query("SELECT c FROM Content c JOIN Translation t ON t.translationId.key = CONCAT('content_title_', c.id) " +
+            "WHERE t.value LIKE %:title% AND c.mediaType <> :mediaType")
+    Page<Content> findByTitleContainingAndMediaTypeNot(@Param("title") String title, @Param("mediaType") String mediaType, Pageable pageable);
+
     @Query("SELECT c FROM Content c JOIN c.contentGenres cg WHERE c.mediaType = :mediaType AND cg.genre = :genre ORDER BY c.viewCount DESC")
     Page<Content> findByMediaTypeAndGenreOrderByViewCountDesc(
             @Param("mediaType") String mediaType,
             @Param("genre") Genre genre,
             Pageable pageable
     );
+
     Page<Content> findByMediaTypeOrderByViewCountDesc(String mediaType, Pageable pageable);
 
     List<Content> findTop5ByMediaTypeOrderByViewCountDesc(String mediaType);

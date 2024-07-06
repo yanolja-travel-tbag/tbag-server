@@ -24,4 +24,10 @@ public class TranslationService {
         translateFields(entity);
         return entity;
     }
+
+    public String translate(String key, Language language) {
+        return translationRepository.findByTranslationId(new TranslationId(key, language))
+                .map(Translation::getValue)
+                .orElse(key);
+    }
 }

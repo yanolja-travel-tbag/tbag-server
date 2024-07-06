@@ -16,7 +16,6 @@ import java.util.Objects;
 public class TranslationId implements Serializable {
     private String key;
 
-//    @Convert(converter = LanguageConverter.class)
     @Enumerated(EnumType.STRING)
     @Column(name = "language")
     private Language language;

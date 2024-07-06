@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.Content;
 
+import com.tbag.tbag_backend.common.Trans;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,6 +10,7 @@ import java.util.List;
 @Builder
 public class ContentSearchDto {
     private Long contentId;
+    @Trans
     private String title;
     private String mediaType;
     private Long viewCount;

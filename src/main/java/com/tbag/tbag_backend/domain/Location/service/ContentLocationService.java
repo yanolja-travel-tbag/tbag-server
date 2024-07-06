@@ -83,7 +83,7 @@ public class ContentLocationService {
                 .createdAt(location.getCreatedAt())
                 .viewCount(location.getViewCount())
                 .image(image != null ? mapToLocationImageDto(image) : null)
-                .contentTitle(content.getTitle())
+                .contentTitle(content.getContentTitleKey())
                 .contentGenres(contentGenres)
                 .contentImages(contentImages)
                 .isInSchedule(isInSchedule)

@@ -18,8 +18,11 @@ public interface ContentLocationRepository extends JpaRepository<ContentLocation
 
     List<ContentLocation> findTop5ByContentMediaTypeOrderByCreatedAtDesc(String mediaType);
 
-    @Query("SELECT cl.id as id, c.title as contentTitle, c.title as contentTitleEng, cl.content.mediaType as contentMediaType, cl.latitude as latitude, cl.longitude as longitude " +
-            "FROM ContentLocation cl JOIN cl.content c WHERE (:mediaType = 'all' OR c.mediaType = :mediaType)")
+    @Query("SELECT cl.id as id, t.value as contentTitle, cl.content.mediaType as contentMediaType, cl.latitude as latitude, cl.longitude as longitude " +
+            "FROM ContentLocation cl " +
+            "JOIN cl.content c " +
+            "JOIN Translation t ON t.translationId.key = CONCAT('content_title_', c.id) "+
+            "WHERE (:mediaType = 'all' OR c.mediaType = :mediaType)")
     List<MapContentLocationProjection> findByMediaType(String mediaType);
 
     @Query("SELECT cl FROM ContentLocation cl")
