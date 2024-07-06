@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.User.service;
 
+import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.domain.Artist.Artist;
 import com.tbag.tbag_backend.domain.Artist.repository.ArtistRepository;
 import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.dto.PreferredArtistRequest;
@@ -30,6 +31,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,18 +65,7 @@ public class UserService {
             throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"이미 회원가입한 유저입니다.");
         }
 
-        for (PreferredGenreRequest preferredGenre : preferredGenres) {
-            for (Long genreId : preferredGenre.getGenreIds()) {
-                Genre genre = genreRepository.findById(genreId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND,"Genre not found"));
-                UserPreferredGenreId userPreferredGenreId = new UserPreferredGenreId(userId, preferredGenre.getMediaType(), genreId);
-                UserPreferredGenre userPreferredGenre = UserPreferredGenre.builder()
-                        .id(userPreferredGenreId)
-                        .user(user)
-                        .genre(genre)
-                        .build();
-                userPreferredGenreRepository.save(userPreferredGenre);
-            }
-        }
+        savePreferredGenre(userId, preferredGenres, user);
 
         for (PreferredArtistRequest preferredArtist : preferredArtists) {
             for (Long artistId : preferredArtist.getArtistIds()) {
@@ -100,7 +91,7 @@ public class UserService {
 
         Map<String, List<UserPreferredGenreDto>> preferredGenres = userPreferredGenreRepository.findByUser(user).stream()
                 .map(upg -> UserPreferredGenreDto.builder()
-                        .mediaType(upg.getId().getMediaType())
+                        .mediaType(com.tbag.tbag_backend.domain.Content.MediaType.valueOf(upg.getId().getMediaType().toUpperCase()).getName(Language.ofLocale().getLocale()))
                         .genreId(upg.getGenre().getId())
                         .genreName(upg.getGenre().getGenreName())
                         .build())
@@ -173,6 +164,46 @@ public class UserService {
             // TODO : Google unlink 추가
             user.updateActivated(false);
             userRepository.save(user);
+        }
+    }
+
+    public void updateNickname(Integer userId, String newNickname, Principal principal) {
+        if (userId != Integer.parseInt(principal.getName())){
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"토큰 인증 정보와 userId 일치하지 않음");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
+
+        user.updateNickname(newNickname, LocalDate.now());
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void updatePreferredGenres(Integer userId, List<PreferredGenreRequest> newPreferredGenres, Principal principal) {
+        if (userId != Integer.parseInt(principal.getName())){
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"토큰 인증 정보와 userId 일치하지 않음");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
+
+        userPreferredGenreRepository.deleteByUser(user);
+
+        savePreferredGenre(userId, newPreferredGenres, user);
+    }
+
+    @Transactional
+    void savePreferredGenre(Integer userId, List<PreferredGenreRequest> newPreferredGenres, User user) {
+        for (PreferredGenreRequest preferredGenre : newPreferredGenres) {
+            for (Long genreId : preferredGenre.getGenreIds()) {
+                Genre genre = genreRepository.findById(genreId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND,"Genre not found"));
+                UserPreferredGenreId userPreferredGenreId = new UserPreferredGenreId(userId, preferredGenre.getMediaType(), genreId);
+                UserPreferredGenre userPreferredGenre = UserPreferredGenre.builder()
+                        .id(userPreferredGenreId)
+                        .user(user)
+                        .genre(genre)
+                        .build();
+                userPreferredGenreRepository.save(userPreferredGenre);
+            }
         }
     }
 }

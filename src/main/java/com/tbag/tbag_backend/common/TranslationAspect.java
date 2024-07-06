@@ -62,11 +62,6 @@ public class TranslationAspect {
         }
         processedObjects.add(obj);
 
-        if (obj instanceof Translatable) {
-            translationService.translateFields((Translatable) obj);
-            return;
-        }
-
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
             try {
@@ -81,6 +76,8 @@ public class TranslationAspect {
                             field.set(obj, translatedValue);
                         }
                     }
+                } else if ("preferredGenres".equals(field.getName())) {
+                    translateGenresField(field, obj);
                 } else {
                     Object fieldValue = field.get(obj);
                     if (fieldValue != null && !isPrimitiveOrWrapper(fieldValue.getClass()) && !(fieldValue instanceof String)) {
@@ -97,6 +94,33 @@ public class TranslationAspect {
             }
         }
         processedObjects.remove(obj);
+    }
+
+    private void translateGenresField(Field field, Object obj) throws IllegalAccessException {
+        Map<String, List<?>> genres = (Map<String, List<?>>) field.get(obj);
+        for (List<?> genreList : genres.values()) {
+            for (Object genreObj : genreList) {
+                translateGenreObject(genreObj);
+            }
+        }
+    }
+
+    private void translateGenreObject(Object genreObj) {
+        Field[] fields = genreObj.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            try {
+                field.setAccessible(true);
+                if ("genreName".equals(field.getName())) {
+                    String genreName = (String) field.get(genreObj);
+                    if (genreName != null) {
+                        String translatedValue = translationService.translate(genreName, Language.ofLocale());
+                        field.set(genreObj, translatedValue);
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void translateListField(Field field, Object obj) throws IllegalAccessException {

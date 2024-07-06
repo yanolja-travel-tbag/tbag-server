@@ -11,5 +11,6 @@ import java.util.List;
 public interface UserPreferredGenreRepository extends JpaRepository<UserPreferredGenre, UserPreferredGenreId> {
 
     List<UserPreferredGenre> findByUser(User user);
+    void deleteByUser(User user);
 
 }

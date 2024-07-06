@@ -2,6 +2,8 @@ package com.tbag.tbag_backend.domain.User.controller;
 
 
 import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.dto.UserRegistrationRequest;
+import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.dto.UpdatePreferredGenresRequest;
+import com.tbag.tbag_backend.domain.User.dto.UpdateNicknameRequest;
 import com.tbag.tbag_backend.domain.User.dto.UserDto;
 import com.tbag.tbag_backend.domain.User.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +37,18 @@ public class UserController {
     @PostMapping("/{userId}/deactivate")
     public ResponseEntity<Void> deactivateUser(@PathVariable Integer userId, Principal principal) {
         userService.deactivateUser(userId, principal);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/update-nickname")
+    public ResponseEntity<Void> updateNickname(@PathVariable Integer userId, @RequestBody UpdateNicknameRequest request, Principal principal) {
+        userService.updateNickname(userId, request.getNickname(), principal);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/update-preferred-genres")
+    public ResponseEntity<Void> updatePreferredGenres(@PathVariable Integer userId, @RequestBody UpdatePreferredGenresRequest request, Principal principal) {
+        userService.updatePreferredGenres(userId, request.getPreferredGenres(), principal);
         return ResponseEntity.ok().build();
     }
 
