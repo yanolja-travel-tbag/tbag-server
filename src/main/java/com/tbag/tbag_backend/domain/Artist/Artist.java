@@ -25,8 +25,6 @@ public class Artist {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    private String name = "artist_name_" + id;
-
     @JsonIgnore
     @Column(name = "profile_image", nullable = true)
     private String profileImage;
@@ -34,4 +32,7 @@ public class Artist {
     @OneToMany(mappedBy = "artist", fetch = FetchType.LAZY)
     private List<ArtistMember> artistMembers;
 
+    public String getArtistNameKey() {
+        return "artist_name_" + id;
+    }
 }

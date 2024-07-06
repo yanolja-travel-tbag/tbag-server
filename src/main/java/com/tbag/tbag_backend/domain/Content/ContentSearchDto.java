@@ -21,7 +21,9 @@ public class ContentSearchDto {
     @Getter
     @Builder
     public static class MemberDto {
+        @Trans
         private String name;
+        @Trans
         private String stageName;
         private String profilePath;
     }

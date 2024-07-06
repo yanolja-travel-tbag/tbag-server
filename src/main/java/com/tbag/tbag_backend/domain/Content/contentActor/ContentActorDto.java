@@ -1,12 +1,16 @@
 package com.tbag.tbag_backend.domain.Content.contentActor;
 
+import com.tbag.tbag_backend.common.Trans;
 import lombok.Data;
 
 @Data
 public class ContentActorDto {
     private Long contentId;
+    @Trans
     private String title;
+    @Trans
     private String character;
+    @Trans
     private String actorName;
     private String posterPath;
     private Long viewCount;

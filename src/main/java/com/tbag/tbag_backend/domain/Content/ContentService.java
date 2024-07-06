@@ -88,28 +88,22 @@ public class ContentService {
             Artist artist = contentArtistRepository.findOneByContentId(content.getId()).getArtist();
 
             members = artist.getArtistMembers().stream()
-                    .map(artistMember -> {
-                        artistMember = translationService.getTranslatedEntity(artistMember);
-                        return ContentSearchDto.MemberDto.builder()
-                                .name(artistMember.getName())
-                                .stageName(artistMember.getName())
-                                .profilePath(artistMember.getProfileImage())
-                                .build();
-                    })
+                    .map(artistMember -> ContentSearchDto.MemberDto.builder()
+                            .name(artistMember.getArtistMemberNameKey())
+                            .stageName(artistMember.getArtistMemberNameKey())
+                            .profilePath(artistMember.getProfileImage())
+                            .build())
                     .collect(Collectors.toList());
 
             contentImages.add(artist.getProfileImage());
 
         } else {
             members = content.getContentActors().stream()
-                    .map(contentActor -> {
-                        contentActor = translationService.getTranslatedEntity(contentActor);
-                        return ContentSearchDto.MemberDto.builder()
-                                .name(contentActor.getActor().getName())
-                                .stageName(contentActor.getCharacter())
-                                .profilePath(imageBaseUrl + contentActor.getActor().getProfilePath())
-                                .build();
-                    })
+                    .map(contentActor -> ContentSearchDto.MemberDto.builder()
+                            .name(contentActor.getActor().getActorNameKey())
+                            .stageName(contentActor.getContentActorCharacterKey())
+                            .profilePath(imageBaseUrl + contentActor.getActor().getProfilePath())
+                            .build())
                     .collect(Collectors.toList());
 
 
@@ -118,7 +112,7 @@ public class ContentService {
 
         return ContentSearchDto.builder()
                 .contentId(content.getId())
-                .title(content.getTitle())
+                .title(content.getContentTitleKey())
                 .mediaType(content.getMediaType())
                 .viewCount(content.getViewCount())
                 .genres(contentGenres)
@@ -131,7 +125,7 @@ public class ContentService {
     public static List<String> getGenresAndImages(Content content, ContentDetails contentDetails, List<String> contentImages, ContentGenreRepository contentGenreRepository, String imageBaseUrl) {
         List<String> contentGenres;
         contentGenres = contentGenreRepository.findByContentId(content.getId()).stream()
-                .map(genre -> genre.getGenre().getName())
+                .map(genre -> genre.getGenre().getGenreName())
                 .collect(Collectors.toList());
 
         if (contentDetails.getPosterPath() != null) {
@@ -170,7 +164,7 @@ public class ContentService {
         } else {
             if (contentDetails != null) {
                 contentGenres = contentGenreRepository.findByContentId(content.getId()).stream()
-                        .map(genre -> genre.getGenre().getName())
+                        .map(genre -> genre.getGenre().getGenreName())
                         .collect(Collectors.toList());
 
                 if (contentDetails.getPosterPath() != null) {
@@ -184,11 +178,11 @@ public class ContentService {
 
         return ContentLocationDetailDto.builder()
                 .locationId(location.getId())
-                .placeName(location.getPlaceName())
-                .placeDescription(location.getPlaceDescription())
-                .businessHours(location.getBusinessHours())
-                .holiday(location.getHoliday())
-                .locationString(location.getLocationString())
+                .placeName(location.getContentLocationPlaceNameKey())
+                .placeDescription(location.getContentLocationPlaceDescriptionKey())
+                .businessHours(location.getContentLocationBusinessHoursKey())
+                .holiday(location.getContentLocationHolidayKey())
+                .locationString(location.getContentLocationLocationStringKey())
                 .placeType(location.getPlaceType())
                 .latitude(location.getLatitude())
                 .longitude(location.getLongitude())
@@ -196,9 +190,10 @@ public class ContentService {
                 .createdAt(location.getCreatedAt())
                 .viewCount(location.getViewCount())
                 .image(image != null ? mapToLocationImageDto(image) : null)
-                .contentTitle(content.getTitle())
+                .contentTitle(content.getContentTitleKey())
                 .contentGenres(contentGenres)
                 .contentImages(contentImages)
+                .mediaType(content.getMediaType())
                 .build();
     }
 
@@ -239,7 +234,7 @@ public class ContentService {
 
         return ContentSimpleDto.builder()
                 .contentId(content.getId())
-                .contentTitle(content.getTitle())
+                .contentTitle(content.getContentTitleKey())
                 .contentViewCount(content.getViewCount())
                 .contentImage(image)
                 .build();

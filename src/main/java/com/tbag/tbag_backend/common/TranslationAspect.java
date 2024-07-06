@@ -9,6 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InaccessibleObjectException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Aspect
 @Component
@@ -16,6 +21,7 @@ import java.lang.reflect.Field;
 public class TranslationAspect {
 
     private final TranslationService translationService;
+    private final ThreadLocal<Set<Object>> translatedObjects = ThreadLocal.withInitial(HashSet::new);
 
     @Around("@annotation(org.springframework.web.bind.annotation.GetMapping)")
     public Object translateFields(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -24,35 +30,96 @@ public class TranslationAspect {
         if (result instanceof ResponseEntity) {
             ResponseEntity<?> responseEntity = (ResponseEntity<?>) result;
             Object body = responseEntity.getBody();
-            if (body instanceof Page) {
-                Page<?> page = (Page<?>) body;
-                page.getContent().forEach(this::translateObject);
-            } else {
-                translateObject(body);
-            }
+            searchObject(body);
             return ResponseEntity.status(responseEntity.getStatusCode()).headers(responseEntity.getHeaders()).body(body);
         } else {
-            translateObject(result);
+            searchObject(result);
         }
 
         return result;
     }
 
+    private void searchObject(Object body) {
+        if (body instanceof Page) {
+            Page<?> page = (Page<?>) body;
+            page.getContent().forEach(this::translateObject);
+        } else if (body instanceof List) {
+            List<?> list = (List<?>) body;
+            list.forEach(this::translateObject);
+        } else if (body instanceof Map) {
+            ((Map<?, ?>) body).values().forEach(this::translateObject);
+        } else {
+            translateObject(body);
+        }
+    }
+
     private void translateObject(Object obj) {
         if (obj == null) return;
 
+        Set<Object> processedObjects = translatedObjects.get();
+        if (processedObjects.contains(obj)) {
+            return;
+        }
+        processedObjects.add(obj);
+
+        if (obj instanceof Translatable) {
+            translationService.translateFields((Translatable) obj);
+            return;
+        }
+
         Field[] fields = obj.getClass().getDeclaredFields();
         for (Field field : fields) {
-            if (field.isAnnotationPresent(Trans.class)) {
+            try {
                 field.setAccessible(true);
-                try {
-                    String originalValue = (String) field.get(obj);
-                    String translatedValue = translationService.translate(originalValue, Language.ofLocale());
-                    field.set(obj, translatedValue);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                if (field.isAnnotationPresent(Trans.class)) {
+                    if (List.class.isAssignableFrom(field.getType())) {
+                        translateListField(field, obj);
+                    } else {
+                        String originalValue = (String) field.get(obj);
+                        if (originalValue != null) {
+                            String translatedValue = translationService.translate(originalValue, Language.ofLocale());
+                            field.set(obj, translatedValue);
+                        }
+                    }
+                } else {
+                    Object fieldValue = field.get(obj);
+                    if (fieldValue != null && !isPrimitiveOrWrapper(fieldValue.getClass()) && !(fieldValue instanceof String)) {
+                        if (fieldValue instanceof List) {
+                            translateListField(field, obj);
+                        } else {
+                            translateObject(fieldValue);
+                        }
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InaccessibleObjectException e) {
+            }
+        }
+        processedObjects.remove(obj);
+    }
+
+    private void translateListField(Field field, Object obj) throws IllegalAccessException {
+        List<?> list = (List<?>) field.get(obj);
+        if (list != null) {
+            if (!list.isEmpty() && list.get(0) instanceof String) {
+                List<String> stringList = (List<String>) list;
+                for (int i = 0; i < stringList.size(); i++) {
+                    String translatedValue = translationService.translate(stringList.get(i), Language.ofLocale());
+                    stringList.set(i, translatedValue);
+                }
+            } else {
+                for (Object element : list) {
+                    translateObject(element);
                 }
             }
         }
+    }
+
+    private boolean isPrimitiveOrWrapper(Class<?> type) {
+        return type.isPrimitive() ||
+                type == Boolean.class || type == Byte.class || type == Character.class ||
+                type == Double.class || type == Float.class || type == Integer.class ||
+                type == Long.class || type == Short.class || type == String.class;
     }
 }

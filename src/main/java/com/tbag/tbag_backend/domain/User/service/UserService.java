@@ -102,14 +102,14 @@ public class UserService {
                 .map(upg -> UserPreferredGenreDto.builder()
                         .mediaType(upg.getId().getMediaType())
                         .genreId(upg.getGenre().getId())
-                        .genreName(upg.getGenre().getName())
+                        .genreName(upg.getGenre().getGenreName())
                         .build())
                 .collect(Collectors.groupingBy(UserPreferredGenreDto::getMediaType));
 
         List<UserPreferredArtistDto> preferredArtists = userPreferredArtistRepository.findByUser(user).stream()
                 .map(upa -> UserPreferredArtistDto.builder()
                         .artistId(upa.getArtist().getId())
-                        .artistName(upa.getArtist().getName())
+                        .artistName(upa.getArtist().getArtistNameKey())
                         .build())
                 .collect(Collectors.toList());
 

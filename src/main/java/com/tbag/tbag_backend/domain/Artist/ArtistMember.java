@@ -17,7 +17,7 @@ import java.util.List;
 @Getter
 @Table(name = "idol_members")
 @NoArgsConstructor
-public class ArtistMember implements Translatable {
+public class ArtistMember {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,47 +29,13 @@ public class ArtistMember implements Translatable {
     @JoinColumn(name = "artist_id", nullable = false)
     private Artist artist;
 
-    private String name;
-
     @Column(name = "profile_image", nullable = true)
     private String profileImage;
 
-    @Override
-    @JsonIgnore
-    public List<TranslatableField> getTranslatableFields() {
-        List<TranslatableField> fields = new ArrayList<>();
-        fields.add(new SimpleTranslatableField(name, "artist_member_name_" + id));
-        return fields;
+    public String getArtistMemberNameKey() {
+        return "idol_members_name_" + id;
     }
 
-    private static class SimpleTranslatableField implements TranslatableField {
-        private String value;
-        private final String key;
-
-        SimpleTranslatableField(String value, String key) {
-            this.value = value;
-            this.key = key;
-        }
-
-        @Override
-        public String getTranslationKey() {
-            return key;
-        }
-
-        @Override
-        public TranslationId getTranslationId() {
-            return new TranslationId(key, Language.ofLocale());
-        }
-
-        @Override
-        public void setTranslatedValue(String translatedValue) {
-            this.value = translatedValue;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
 }
 
 

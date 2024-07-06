@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.Location.service;
 
+import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDto;
 import com.tbag.tbag_backend.domain.Location.dto.MapContentLocationDto;
 import com.tbag.tbag_backend.domain.Location.dto.MarkerLocationDto;
@@ -49,8 +50,12 @@ public class PublicContentLocationService {
     @Cacheable(value = "contentLocations")
     public List<MapContentLocationDto> getContentLocations(String mediaType) {
         List<MapContentLocationProjection> projections = contentLocationRepository.findByMediaType(mediaType);
-        return projections.stream().map(this::mapToMapContentLocationDto).collect(Collectors.toList());
+        String localeLanguage = Language.ofLocale().name();
+        return projections.stream()
+                .map(projection -> mapToMapContentLocationDto(projection, localeLanguage))
+                .collect(Collectors.toList());
     }
+
 
     public MarkerLocationDto getContentLocationById(Long id) {
         Optional<ContentLocation> locationOptional = contentLocationRepository.findById(id);
@@ -74,9 +79,9 @@ public class PublicContentLocationService {
 
         return ContentLocationDto.builder()
                 .locationId(contentLocation.getId())
-                .placeName(contentLocation.getPlaceName())
-                .businessHours(contentLocation.getBusinessHours())
-                .locationString(contentLocation.getLocationString())
+                .placeName(contentLocation.getContentLocationPlaceNameKey())
+                .businessHours(contentLocation.getContentLocationBusinessHoursKey())
+                .locationString(contentLocation.getContentLocationLocationStringKey())
                 .placeType(contentLocation.getPlaceType())
                 .viewCount(contentLocation.getViewCount())
                 .image(imageDto)
@@ -84,10 +89,10 @@ public class PublicContentLocationService {
                 .build();
     }
 
-    private MapContentLocationDto mapToMapContentLocationDto(MapContentLocationProjection projection) {
+    private MapContentLocationDto mapToMapContentLocationDto(MapContentLocationProjection projection, String localeLanguage) {
         return MapContentLocationDto.builder()
                 .locationId(projection.getId())
-                .contentTitle(projection.getContentTitle())
+                .contentTitle(localeLanguage.equals("en") ? projection.getContentTitleEng() : projection.getContentTitle())
                 .contentMediaType(projection.getContentMediaType())
                 .latitude(projection.getLatitude())
                 .longitude(projection.getLongitude())
@@ -99,8 +104,8 @@ public class PublicContentLocationService {
 
         return MarkerLocationDto.builder()
                 .locationId(location.getId())
-                .placeName(location.getPlaceName())
-                .locationString(location.getLocationString())
+                .placeName(location.getContentLocationPlaceNameKey())
+                .locationString(location.getContentLocationLocationStringKey())
                 .placeType(location.getPlaceType())
                 .latitude(location.getLatitude())
                 .longitude(location.getLongitude())

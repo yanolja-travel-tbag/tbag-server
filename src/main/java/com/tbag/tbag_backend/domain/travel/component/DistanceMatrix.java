@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.travel.component;
 
+import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import com.tbag.tbag_backend.domain.Location.repository.ContentLocationRepository;
 import com.tbag.tbag_backend.domain.travel.dto.TravelRouteResponse;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -37,7 +39,6 @@ public class DistanceMatrix {
     private String baseUrl;
     private final OkHttpClient client = new OkHttpClient();
     private final TravelWaypointRepository waypointRepository;
-    private final ContentLocationRepository locationRepository;
 
     @Async
     public CompletableFuture<JSONObject> getDistanceMatrixAsync(String origins, String destinations) throws IOException {
@@ -55,7 +56,7 @@ public class DistanceMatrix {
             for (int j = 0; j < n; j++) {
                 if (i != j) {
                     JSONObject elements = getDistanceElements(distanceResponses[i][j]);
-                    adjacencyMatrix[i][j] = elements.getJSONObject("distance").getInt("value");
+                    adjacencyMatrix[i][j] = elements.getJSONObject("duration").getInt("value");
                 }
             }
         }
@@ -75,8 +76,10 @@ public class DistanceMatrix {
         segment.setOrigin(origin);
 
         JSONObject elements = getDistanceElements(response);
-        segment.setDistance(elements.getJSONObject("distance").getInt("value"));
-        segment.setDuration(elements.getJSONObject("duration").getInt("value"));
+        segment.setDistance(elements.getJSONObject("distance").getLong("value"));
+        segment.setDuration(elements.getJSONObject("duration").getLong("value"));
+        segment.setDistanceString(elements.getJSONObject("distance").getString("text"));
+        segment.setDurationString(elements.getJSONObject("duration").getString("text"));
 
         segment.setOrder(order);
 
@@ -93,7 +96,7 @@ public class DistanceMatrix {
         location.setLocationId(contentLocation.getId());
         location.setLatitude(contentLocation.getLatitude());
         location.setLongitude(contentLocation.getLongitude());
-        location.setPlaceName(contentLocation.getPlaceName());
+        location.setPlaceName(contentLocation.getContentLocationPlaceNameKey());
         location.setImage(contentLocation.getLocationImages().stream().findFirst().get().getImageUrl());
 
         if (isOrigin) {
@@ -105,7 +108,7 @@ public class DistanceMatrix {
         return location;
     }
 
-    public TravelRouteResponse buildTravelSegments(String[] locations, List<Long> waypointIds) throws IOException, ExecutionException, InterruptedException {
+    public void buildTravelSegments(String[] locations, List<Long> waypointIds) throws IOException, ExecutionException, InterruptedException {
         int n = locations.length;
         int[][] adjacencyMatrix = new int[n][n];
         List<CompletableFuture<JSONObject>> futures = new ArrayList<>();
@@ -129,11 +132,7 @@ public class DistanceMatrix {
 
         int[] bestRoute = new TSPSolver().findBestRoute(adjacencyMatrix);
 
-        List<TravelSegmentResponse> segments = new ArrayList<>();
-        int totalDistance = 0;
-        int totalDuration = 0;
-
-        for (int i = 0; i < bestRoute.length; i++) {
+        for (int i = 0; i < bestRoute.length - 1; i++) {
             int originIndex = bestRoute[i];
             int destinationIndex = bestRoute[(i + 1) % bestRoute.length];
 
@@ -142,20 +141,18 @@ public class DistanceMatrix {
 
             JSONObject response = distanceResponses[originIndex][destinationIndex];
             TravelSegmentResponse segment = createTravelSegment(i + 1, response, originWaypointId);
-
-            segments.add(segment);
             updateWaypoint(originWaypointId, destWaypointId, segment, i);
-
-            totalDistance += segment.getDistance();
-            totalDuration += segment.getDuration();
         }
 
-        TravelRouteResponse result = new TravelRouteResponse();
-        result.setSegments(segments);
-        result.setTotalDistance(totalDistance);
-        result.setTotalDuration(totalDuration);
+        int lastIndex = bestRoute[bestRoute.length-1];
 
-        return result;
+        Long originWaypointId = waypointIds.get(lastIndex);
+
+        TravelWaypoint originWaypoint = waypointRepository.findById(originWaypointId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Origin Waypoint not found"));
+        originWaypoint.setSequence(bestRoute.length-1);
+
+        waypointRepository.save(originWaypoint);
     }
 
     private void updateWaypoint(Long originWaypointId, Long destWaypointId, TravelSegmentResponse segment, int sequence) {

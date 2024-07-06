@@ -26,7 +26,7 @@ public class ArtistService {
 
 
     public Page<ArtistSearchDto> searchArtistsByKeyword(String keyword, Pageable pageable) {
-        Page<ArtistMember> artistMembers = artistMemberRepository.searchMembersByKeyword(keyword, Language.ofLocale(), pageable);
+        Page<ArtistMember> artistMembers = artistMemberRepository.searchMembersByKeyword(keyword, pageable);
         return artistMembers.map(this::convertToDTO);
     }
 
@@ -35,9 +35,9 @@ public class ArtistService {
         Artist artist = artistMember.getArtist();
         ContentArtist contentArtist = contentArtistRepository.findOneByArtist(artist);
         artistSearchDto.setContentId(contentArtist.getContent().getId());
-        artistSearchDto.setArtistName(artist.getName());
+        artistSearchDto.setArtistName(artist.getArtistNameKey());
         artistSearchDto.setProfileImage(artist.getProfileImage());
-        artistSearchDto.setMember(artistMember);
+        artistSearchDto.setMember(new ArtistSearchDto.ArtistMemberDto(artistMember.getId(), artistMember.getArtistMemberNameKey(), artistMember.getProfileImage()));
         artistSearchDto.setViewCount(contentArtist.getContent().getViewCount());
         artistSearchDto.setMediaType(contentArtist.getContent().getMediaType());
 

@@ -37,7 +37,7 @@ public class TravelController {
     }
 
     @GetMapping("/request/{id}")
-    public TravelRouteResponse getTravelRequestById(@PathVariable Long id) {
+    public TravelRouteResponse getTravelRequestById(@PathVariable Long id) throws IOException, ExecutionException, InterruptedException {
         return travelService.getTravelRequestById(id);
     }
 
@@ -60,8 +60,8 @@ public class TravelController {
     }
 
     @GetMapping("/optimize/{travelRequestId}")
-    public TravelRouteResponse optimizeRoute(@PathVariable Long travelRequestId) throws IOException, ExecutionException, InterruptedException, ApiException {
-        return travelService.optimizeRoute(travelRequestId);
+    public void optimizeRoute(@PathVariable Long travelRequestId) throws IOException, ExecutionException, InterruptedException, ApiException {
+        travelService.optimizeRoute(travelRequestId);
     }
 }
 

@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.Location.dto;
 
+import com.tbag.tbag_backend.common.Trans;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -6,6 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TravelWaypointRepository extends JpaRepository<TravelWaypoint, Long> {
-    List<TravelWaypoint> findByTravelRequestId(Long travelRequestId);
-
+    List<TravelWaypoint> findByTravelRequestIdOrderBySequenceAsc(Long travelRequestId);
 }

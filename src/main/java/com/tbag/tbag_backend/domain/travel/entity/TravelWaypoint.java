@@ -2,12 +2,17 @@ package com.tbag.tbag_backend.domain.travel.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
+import com.tbag.tbag_backend.domain.travel.component.DistanceMatrix;
 import com.tbag.tbag_backend.domain.travel.dto.TravelSegmentResponse;
 import lombok.*;
+import org.json.JSONObject;
 
 import javax.persistence.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -51,48 +56,84 @@ public class TravelWaypoint {
         this.duration = duration;
     }
 
-    public static TravelSegmentResponse toResponse(TravelWaypoint travelWaypoint) {
+    public static CompletableFuture<TravelSegmentResponse> toResponseAsync(TravelWaypoint travelWaypoint, DistanceMatrix distanceMatrix) throws IOException {
         if (travelWaypoint == null) {
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
 
         TravelSegmentResponse response = new TravelSegmentResponse();
         response.setWaypointId(travelWaypoint.getId());
         response.setOrder(travelWaypoint.getSequence());
 
-        TravelSegmentResponse.LocationDTO origin = new TravelSegmentResponse.LocationDTO();
-        if (travelWaypoint.getOriginLocation() != null) {
-            origin.setLocationId(travelWaypoint.getOriginLocation().getId());
-            origin.setPlaceName(travelWaypoint.getOriginLocation().getPlaceName());
-            origin.setLatitude(travelWaypoint.getOriginLocation().getLatitude());
-            origin.setLongitude(travelWaypoint.getOriginLocation().getLongitude());
-            origin.setAddresses(travelWaypoint.getOriginLocation().getLocationString());
-
-            if (travelWaypoint.getOriginLocation().getLocationImages() != null &&
-                    !travelWaypoint.getOriginLocation().getLocationImages().isEmpty()) {
-                origin.setImage(travelWaypoint.getOriginLocation().getLocationImages().get(0).getImageUrl());
-            } else {
-                origin.setImage(null);
-            }
-        }
+        TravelSegmentResponse.LocationDTO origin = populateLocationDTO(travelWaypoint.getOriginLocation());
         response.setOrigin(origin);
-        response.setDistance(travelWaypoint.getDistance());
-        response.setDuration(travelWaypoint.getDuration());
 
-        return response;
+        if (travelWaypoint.getDestLocation() != null) {
+            String origins = travelWaypoint.getOriginLocation().getLatitude() + "," + travelWaypoint.getOriginLocation().getLongitude();
+            String destinations = travelWaypoint.getDestLocation().getLatitude() + "," + travelWaypoint.getDestLocation().getLongitude();
+
+            TravelSegmentResponse.LocationDTO dest = populateLocationDTO(travelWaypoint.getDestLocation());
+            response.setDest(dest);
+
+            return distanceMatrix.getDistanceMatrixAsync(origins, destinations).thenApply(distanceMatrixResponse -> {
+                try {
+                    JSONObject element = distanceMatrixResponse.getJSONArray("rows").getJSONObject(0)
+                            .getJSONArray("elements").getJSONObject(0);
+                    response.setDistance(element.getJSONObject("distance").getLong("value"));
+                    response.setDuration(element.getJSONObject("duration").getLong("value"));
+                    response.setDistanceString(element.getJSONObject("distance").getString("text"));
+                    response.setDurationString(element.getJSONObject("duration").getString("text"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return response;
+            });
+        } else {
+
+            return CompletableFuture.completedFuture(response);
+        }
     }
 
-    public static List<TravelSegmentResponse> toResponseList(List<TravelWaypoint> travelWaypoints) {
+    public static CompletableFuture<List<TravelSegmentResponse>> toResponseList(List<TravelWaypoint> travelWaypoints, DistanceMatrix distanceMatrix) throws IOException {
         if (travelWaypoints == null) {
-            return null;
+            return CompletableFuture.completedFuture(null);
         }
 
-        List<TravelSegmentResponse> responses = new ArrayList<>();
+        List<CompletableFuture<TravelSegmentResponse>> futures = new ArrayList<>();
         for (TravelWaypoint travelWaypoint : travelWaypoints) {
-            responses.add(toResponse(travelWaypoint));
+            futures.add(toResponseAsync(travelWaypoint, distanceMatrix));
         }
 
-        return responses;
+        CompletableFuture<Void> allOf = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+        return allOf.thenApply(v -> {
+            List<TravelSegmentResponse> responses = new ArrayList<>();
+            for (CompletableFuture<TravelSegmentResponse> future : futures) {
+                try {
+                    responses.add(future.get());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return responses;
+        });
+    }
+
+    private static TravelSegmentResponse.LocationDTO populateLocationDTO(ContentLocation location) {
+        TravelSegmentResponse.LocationDTO locationDTO = new TravelSegmentResponse.LocationDTO();
+        if (location != null) {
+            locationDTO.setLocationId(location.getId());
+            locationDTO.setPlaceName(location.getContentLocationPlaceNameKey());
+            locationDTO.setLatitude(location.getLatitude());
+            locationDTO.setLongitude(location.getLongitude());
+            locationDTO.setAddresses(location.getContentLocationLocationStringKey());
+
+            if (location.getLocationImages() != null && !location.getLocationImages().isEmpty()) {
+                locationDTO.setImage(location.getLocationImages().get(0).getImageUrl());
+            } else {
+                locationDTO.setImage(null);
+            }
+        }
+        return locationDTO;
     }
 
 }

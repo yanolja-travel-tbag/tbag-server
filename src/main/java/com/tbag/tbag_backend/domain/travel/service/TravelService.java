@@ -1,5 +1,6 @@
 package com.tbag.tbag_backend.domain.travel.service;
 
+import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import com.tbag.tbag_backend.domain.Location.repository.ContentLocationRepository;
 import com.tbag.tbag_backend.domain.User.entity.User;
@@ -20,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -48,23 +49,67 @@ public class TravelService {
         return travelRequestRepository.save(travelRequest);
     }
 
-    public TravelRouteResponse getTravelRequestById(Long travelRequestId) {
-        List<TravelWaypoint> travelWaypoints = travelWaypointRepository.findByTravelRequestId(travelRequestId);
-        List<TravelSegmentResponse> segmentResponses = TravelWaypoint.toResponseList(travelWaypoints);
+    public TravelRouteResponse getTravelRequestById(Long travelRequestId) throws IOException, ExecutionException, InterruptedException {
+        List<TravelWaypoint> travelWaypoints = travelWaypointRepository.findByTravelRequestIdOrderBySequenceAsc(travelRequestId);
+        CompletableFuture<List<TravelSegmentResponse>> futureResponses = TravelWaypoint.toResponseList(travelWaypoints, distanceMatrix);
+
+        List<TravelSegmentResponse> segmentResponses = futureResponses.get();
 
         long totalDistance = segmentResponses.stream()
-                .mapToLong(TravelSegmentResponse::getDistance)
+                .mapToLong(segment -> Optional.ofNullable(segment.getDistance())
+                        .orElse(0L))
                 .sum();
         long totalDuration = segmentResponses.stream()
-                .mapToLong(TravelSegmentResponse::getDuration)
+                .mapToLong(segment -> Optional.ofNullable(segment.getDuration())
+                        .orElse(0L))
                 .sum();
 
         TravelRouteResponse travelRouteResponse = new TravelRouteResponse();
         travelRouteResponse.setSegments(segmentResponses);
         travelRouteResponse.setTotalDistance(totalDistance);
         travelRouteResponse.setTotalDuration(totalDuration);
+        travelRouteResponse.setTotalDistanceString(formatDistance(totalDistance));
+        travelRouteResponse.setTotalDurationString(formatDuration(totalDuration));
 
         return travelRouteResponse;
+    }
+
+    private String formatDistance(long distanceInMeters) {
+        Locale locale = Language.ofLocale().getLocale();
+        if (locale.getLanguage().equals(new Locale("ko").getLanguage())) {
+            if (distanceInMeters >= 1000) {
+                return String.format(locale, "%.2f km", distanceInMeters / 1000.0);
+            } else {
+                return String.format(locale, "%d m", distanceInMeters);
+            }
+        } else {
+            if (distanceInMeters >= 1000) {
+                return String.format(locale, "%.2f km", distanceInMeters / 1000.0);
+            } else {
+                return String.format(locale, "%d meters", distanceInMeters);
+            }
+        }
+    }
+
+    private String formatDuration(long durationInSeconds) {
+        Locale locale = Language.ofLocale().getLocale();
+        if (locale.getLanguage().equals(new Locale("ko").getLanguage())) {
+            if (durationInSeconds >= 3600) {
+                return String.format(locale, "%.2f 시간", durationInSeconds / 3600.0);
+            } else if (durationInSeconds >= 60) {
+                return String.format(locale, "%d 분", durationInSeconds / 60);
+            } else {
+                return String.format(locale, "%d 초", durationInSeconds);
+            }
+        } else {
+            if (durationInSeconds >= 3600) {
+                return String.format(locale, "%.2f hours", durationInSeconds / 3600.0);
+            } else if (durationInSeconds >= 60) {
+                return String.format(locale, "%d minutes", durationInSeconds / 60);
+            } else {
+                return String.format(locale, "%d seconds", durationInSeconds);
+            }
+        }
     }
 
     @Transactional
@@ -73,12 +118,21 @@ public class TravelService {
                 .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Invalid travel request ID"));
         ContentLocation location = contentLocationRepository.findById(locationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found"));
-        List<TravelWaypoint> travelWaypoints = travelWaypointRepository.findByTravelRequestId(travelRequestId);
+        List<TravelWaypoint> travelWaypoints = travelWaypointRepository.findByTravelRequestIdOrderBySequenceAsc(travelRequestId);
 
         boolean locationExists = travelWaypoints.stream()
                 .anyMatch(waypoint -> waypoint.getOriginLocation().getId().equals(locationId));
         if (locationExists) {
             throw new CustomException(ErrorCode.DUPLICATED_DATA, "The location is already present in the travel request.");
+        }
+
+        TravelWaypoint lastWaypoint = travelWaypoints.stream()
+                .max(Comparator.comparing(TravelWaypoint::getSequence))
+                .orElse(null);
+
+        if (lastWaypoint != null) {
+            lastWaypoint.setDestLocation(location);
+            travelWaypointRepository.save(lastWaypoint);
         }
 
         TravelWaypoint newWaypoint = TravelWaypoint.builder()
@@ -90,7 +144,8 @@ public class TravelService {
         travelWaypointRepository.save(newWaypoint);
     }
 
-    public TravelRouteResponse optimizeRoute(Long travelRequestId) throws IOException, ExecutionException, InterruptedException {
+
+    public void optimizeRoute(Long travelRequestId) throws IOException, ExecutionException, InterruptedException {
         List<TravelWaypoint> waypoints = resetWaypoints(travelRequestId);
         String[] locations = new String[waypoints.size()];
         List<Long> waypointIds = new ArrayList<>();
@@ -101,11 +156,11 @@ public class TravelService {
             waypointIds.add(waypoints.get(i).getId());
         }
 
-        return distanceMatrix.buildTravelSegments(locations, waypointIds);
+        distanceMatrix.buildTravelSegments(locations, waypointIds);
     }
 
     private List<TravelWaypoint> resetWaypoints(Long travelRequestId) {
-        List<TravelWaypoint> waypoints = travelWaypointRepository.findByTravelRequestId(travelRequestId);
+        List<TravelWaypoint> waypoints = travelWaypointRepository.findByTravelRequestIdOrderBySequenceAsc(travelRequestId);
 
         waypoints.forEach(waypoint -> {
             waypoint.setSequence(0);

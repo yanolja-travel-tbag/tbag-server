@@ -5,6 +5,8 @@ public interface MapContentLocationProjection {
 
     String getContentTitle();
 
+    String getContentTitleEng();
+
     String getContentMediaType();
 
     Double getLatitude();

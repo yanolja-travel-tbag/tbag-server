@@ -25,7 +25,10 @@ public class Content {
     private Long viewCount;
 
     private String mediaType;
+
     private String title;
+
+    private String titleEng;
 
     @OneToMany(mappedBy = "content", fetch = FetchType.LAZY)
     private List<ContentGenre> contentGenres;
