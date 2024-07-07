@@ -1,8 +1,6 @@
 package com.tbag.tbag_backend.domain.Content;
 
-import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;

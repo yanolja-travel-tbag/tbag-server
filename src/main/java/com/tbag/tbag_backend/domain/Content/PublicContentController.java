@@ -1,6 +1,6 @@
 package com.tbag.tbag_backend.domain.Content;
 
-import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
+import com.tbag.tbag_backend.domain.Location.dto.ContentLocationSearchDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,7 +56,7 @@ public class PublicContentController {
     }
 
     @GetMapping("/{id}/related-locations")
-    public Page<ContentLocationDetailDto> getRelatedLocations(
+    public Page<ContentLocationSearchDto> getRelatedLocations(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

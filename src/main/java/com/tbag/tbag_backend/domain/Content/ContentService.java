@@ -1,16 +1,13 @@
 package com.tbag.tbag_backend.domain.Content;
 
 import com.tbag.tbag_backend.common.Translate;
-import com.tbag.tbag_backend.common.TranslationService;
 import com.tbag.tbag_backend.domain.Artist.Artist;
 import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.entity.UserPreferredArtist;
-import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.repository.UserPreferredArtistRepository;
 import com.tbag.tbag_backend.domain.Content.contentArtist.ContentArtist;
 import com.tbag.tbag_backend.domain.Genre.Genre;
 import com.tbag.tbag_backend.domain.Genre.repository.GenreRepository;
 import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.entity.UserPreferredGenre;
-import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.repository.UserPreferredGenreRepository;
-import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
+import com.tbag.tbag_backend.domain.Location.dto.ContentLocationSearchDto;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImage;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImageDto;
@@ -226,7 +223,7 @@ public class ContentService {
         return contentGenres;
     }
 
-    public Page<ContentLocationDetailDto> getRelatedLocations(Long id, int page, int size, String sort) {
+    public Page<ContentLocationSearchDto> getRelatedLocations(Long id, int page, int size, String sort) {
         Pageable pageable;
         if ("viewCount".equalsIgnoreCase(sort)) {
             pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "viewCount"));
@@ -235,54 +232,28 @@ public class ContentService {
         }
         Page<ContentLocation> locationsPage = contentLocationRepository.findByContentId(id, pageable);
 
-        return locationsPage.map(this::mapToContentLocationDetailDto);
+        return locationsPage.map(this::mapToContentLocationSearchDto);
     }
 
-    private ContentLocationDetailDto mapToContentLocationDetailDto(ContentLocation location) {
+    private ContentLocationSearchDto mapToContentLocationSearchDto(ContentLocation location) {
+        return mapToContentLocationSearchDto(location, null);
+    }
+
+    private ContentLocationSearchDto mapToContentLocationSearchDto(ContentLocation location, Integer userId) {
         LocationImage image = locationImageRepository.findFirstByContentLocationOrderByIdAsc(location);
         Content content = location.getContent();
-        ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
-        List<String> contentGenres = new ArrayList<>();
-        List<String> contentImages = new ArrayList<>();
 
-        if (content.isMediaTypeArtist()) {
-            ContentArtist contentArtist = contentArtistRepository.findOneByContentId(content.getId());
-            if (contentArtist.getArtist().getProfileImage() != null) {
-                contentImages.add(contentArtist.getArtist().getProfileImage());
-            }
-        } else {
-            if (contentDetails != null) {
-                contentGenres = contentGenreRepository.findByContentId(content.getId()).stream()
-                        .map(genre -> genre.getGenre().getGenreName())
-                        .collect(Collectors.toList());
+        boolean isInSchedule = location.isInSchedule(userId);
 
-                if (contentDetails.getPosterPath() != null) {
-                    contentImages.add(imageBaseUrl + contentDetails.getPosterPath());
-                }
-                if (contentDetails.getBackdropPath() != null) {
-                    contentImages.add(imageBaseUrl + contentDetails.getBackdropPath());
-                }
-            }
-        }
-
-        return ContentLocationDetailDto.builder()
+        return ContentLocationSearchDto.builder()
                 .locationId(location.getId())
                 .placeName(location.getContentLocationPlaceNameKey())
-                .placeDescription(location.getContentLocationPlaceDescriptionKey())
-                .businessHours(location.getContentLocationBusinessHoursKey())
-                .holiday(location.getContentLocationHolidayKey())
-                .locationString(location.getContentLocationLocationStringKey())
                 .placeType(location.getPlaceType())
-                .latitude(location.getLatitude())
-                .longitude(location.getLongitude())
-                .phoneNumber(location.getPhoneNumber())
-                .createdAt(location.getCreatedAt())
+                .mediaType(content.getMediaType())
                 .viewCount(location.getViewCount())
                 .image(image != null ? mapToLocationImageDto(image) : null)
                 .contentTitle(content.getContentTitleKey())
-                .contentGenres(contentGenres)
-                .contentImages(contentImages)
-                .mediaType(content.getMediaType())
+                .isInSchedule(isInSchedule)
                 .build();
     }
 

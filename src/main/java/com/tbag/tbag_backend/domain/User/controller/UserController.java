@@ -5,7 +5,7 @@ import com.tbag.tbag_backend.domain.Artist.userPreferredArtist.dto.UserRegistrat
 import com.tbag.tbag_backend.domain.Content.ContentSearchDto;
 import com.tbag.tbag_backend.domain.Content.ContentService;
 import com.tbag.tbag_backend.domain.Genre.userPreferredGenre.dto.UpdatePreferredGenresRequest;
-import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
+import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailedDto;
 import com.tbag.tbag_backend.domain.Location.service.ContentLocationService;
 import com.tbag.tbag_backend.domain.User.dto.UpdateNicknameRequest;
 import com.tbag.tbag_backend.domain.User.dto.UserDto;
@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/locations-history")
-    public Page<ContentLocationDetailDto> getHistoryContentLocationss(
+    public Page<ContentLocationDetailedDto> getHistoryContentLocationss(
             @PathVariable Integer userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

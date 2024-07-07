@@ -2,8 +2,9 @@ package com.tbag.tbag_backend.domain.Location.service;
 
 import com.tbag.tbag_backend.domain.Content.*;
 import com.tbag.tbag_backend.domain.Content.contentArtist.ContentArtist;
+import com.tbag.tbag_backend.domain.Location.dto.ContentLocationSearchDto;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
-import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
+import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailedDto;
 import com.tbag.tbag_backend.domain.Location.repository.ContentLocationRepository;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImage;
 import com.tbag.tbag_backend.domain.Location.locationImage.LocationImageDto;
@@ -41,7 +42,7 @@ public class ContentLocationService {
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
 
-    public ContentLocationDetailDto getContentLocationById(Long id, Integer userId) {
+    public ContentLocationDetailedDto getContentLocationById(Long id, Integer userId) {
         Optional<ContentLocation> locationOptional = contentLocationRepository.findById(id);
         if (locationOptional.isPresent()) {
             ContentLocation location = locationOptional.get();
@@ -59,11 +60,33 @@ public class ContentLocationService {
         setOps.add(locationId.toString());
     }
 
-    private ContentLocationDetailDto mapToContentLocationDetailDto(ContentLocation location) {
+    private ContentLocationDetailedDto mapToContentLocationDetailDto(ContentLocation location) {
         return mapToContentLocationDetailDto(location, null);
     }
 
-    private ContentLocationDetailDto mapToContentLocationDetailDto(ContentLocation location, Integer userId) {
+    private ContentLocationSearchDto mapToContentLocationSearchDto(ContentLocation location) {
+        return mapToContentLocationSearchDto(location, null);
+    }
+
+    private ContentLocationSearchDto mapToContentLocationSearchDto(ContentLocation location, Integer userId) {
+        LocationImage image = locationImageRepository.findFirstByContentLocationOrderByIdAsc(location);
+        Content content = location.getContent();
+
+        boolean isInSchedule = location.isInSchedule(userId);
+
+        return ContentLocationSearchDto.builder()
+                .locationId(location.getId())
+                .placeName(location.getContentLocationPlaceNameKey())
+                .placeType(location.getPlaceType())
+                .mediaType(content.getMediaType())
+                .viewCount(location.getViewCount())
+                .image(image != null ? mapToLocationImageDto(image) : null)
+                .contentTitle(content.getContentTitleKey())
+                .isInSchedule(isInSchedule)
+                .build();
+    }
+
+    private ContentLocationDetailedDto mapToContentLocationDetailDto(ContentLocation location, Integer userId) {
         LocationImage image = locationImageRepository.findFirstByContentLocationOrderByIdAsc(location);
         Content content = location.getContent();
         ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
@@ -83,7 +106,7 @@ public class ContentLocationService {
 
         boolean isInSchedule = location.isInSchedule(userId);
 
-        return ContentLocationDetailDto.builder()
+        return ContentLocationDetailedDto.builder()
                 .locationId(location.getId())
                 .placeName(location.getContentLocationPlaceNameKey())
                 .placeDescription(location.getContentLocationPlaceDescriptionKey())
@@ -115,7 +138,7 @@ public class ContentLocationService {
                 .build();
     }
 
-    public Page<ContentLocationDetailDto> getRecommendedContentLocations(Long id, int page, int size) {
+    public Page<ContentLocationSearchDto> getRecommendedContentLocations(Long id, int page, int size) {
         ContentLocation currentLocation = contentLocationRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found"));
 
@@ -123,19 +146,19 @@ public class ContentLocationService {
         Page<ContentLocation> locationsPage = contentLocationRepository
                 .findRecommendedLocations(currentLocation.getContent().getId(), currentLocation.getPlaceType(), id, pageable);
 
-        return locationsPage.map(this::mapToContentLocationDetailDto);
+        return locationsPage.map(this::mapToContentLocationSearchDto);
     }
 
-    public Page<ContentLocationDetailDto> searchContentLocations(String keyword, int page, int size) {
+    public Page<ContentLocationSearchDto> searchContentLocations(String keyword, int page, int size) {
         String trimmedKeyword = keyword.trim();
         Pageable pageable = PageRequest.of(page, size);
 
         Page<ContentLocation> locations = contentLocationRepository.findByKeyword(trimmedKeyword, pageable);
 
-        return locations.map(this::mapToContentLocationDetailDto);
+        return locations.map(this::mapToContentLocationSearchDto);
     }
 
-    public Page<ContentLocationDetailDto> getHistoryContentLocationss(Pageable pageable, Integer userId, Principal principal) {
+    public Page<ContentLocationDetailedDto> getHistoryContentLocationss(Pageable pageable, Integer userId, Principal principal) {
         if (userId != Integer.parseInt(principal.getName())){
             throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"토큰 인증 정보와 userId 일치하지 않음");
         }
@@ -152,14 +175,14 @@ public class ContentLocationService {
                 .collect(Collectors.toList());
 
         List<ContentLocation> contents = contentLocationRepository.findAllById(idList);
-        List<ContentLocationDetailDto> contentSearchDtos = contents.stream()
+        List<ContentLocationDetailedDto> contentSearchDtos = contents.stream()
                 .map(this::mapToContentLocationDetailDto)
                 .collect(Collectors.toList());
 
         int start = Math.min((int)pageable.getOffset(), contentSearchDtos.size());
         int end = Math.min((start + pageable.getPageSize()), contentSearchDtos.size());
 
-        List<ContentLocationDetailDto> pagedContent = contentSearchDtos.subList(start, end);
+        List<ContentLocationDetailedDto> pagedContent = contentSearchDtos.subList(start, end);
 
         return new PageImpl<>(pagedContent, pageable, contentSearchDtos.size());
     }

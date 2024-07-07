@@ -1,9 +1,6 @@
 package com.tbag.tbag_backend.domain.Location.controller;
 
-import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDetailDto;
-import com.tbag.tbag_backend.domain.Location.dto.ContentLocationDto;
-import com.tbag.tbag_backend.domain.Location.dto.MapContentLocationDto;
-import com.tbag.tbag_backend.domain.Location.dto.MarkerLocationDto;
+import com.tbag.tbag_backend.domain.Location.dto.*;
 import com.tbag.tbag_backend.domain.Location.service.ContentLocationService;
 import com.tbag.tbag_backend.domain.Location.service.PublicContentLocationService;
 import lombok.RequiredArgsConstructor;
@@ -47,24 +44,22 @@ public class PublicContentLocationController {
         return publicContentLocationService.getContentLocationById(id);
     }
 
+    @GetMapping("/{id}/detailed")
+    public ContentLocationDetailedDto getContentLocationDetailById(@PathVariable Long id, Principal principal) {
+        Integer userId = (principal != null) ? Integer.parseInt(principal.getName()) : null;
+        return contentLocationService.getContentLocationById(id, userId);
+    }
 
     @GetMapping("/search")
-    public Page<ContentLocationDetailDto> searchContentLocations(
+    public Page<ContentLocationSearchDto> searchContentLocations(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return contentLocationService.searchContentLocations(keyword, page, size);
     }
 
-
-    @GetMapping("/{id}/detailed")
-    public ContentLocationDetailDto getContentLocationDetailById(@PathVariable Long id, Principal principal) {
-        Integer userId = (principal != null) ? Integer.parseInt(principal.getName()) : null;
-        return contentLocationService.getContentLocationById(id, userId);
-    }
-
     @GetMapping("/{id}/recommended")
-    public Page<ContentLocationDetailDto> getRecommendedContentLocations(
+    public Page<ContentLocationSearchDto> getRecommendedContentLocations(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
