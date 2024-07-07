@@ -26,7 +26,7 @@ public class ContentActor {
     private Actor actor;
 
     public String getContentActorCharacterKey() {
-        return "content_actor_character_" + id.getContentId()+id.getActorId();
+        return "content_actor_character_" + id.getContentId()+ "_" + id.getActorId();
     }
 
 }

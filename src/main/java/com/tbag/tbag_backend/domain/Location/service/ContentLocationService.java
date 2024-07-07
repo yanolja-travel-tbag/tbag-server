@@ -13,13 +13,18 @@ import com.tbag.tbag_backend.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.BoundSetOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +35,7 @@ public class ContentLocationService {
     private final ContentDetailRepository contentDetailsRepository;
     private final ContentGenreRepository contentGenreRepository;
     private final ContentArtistRepository contentArtistRepository;
+    private final RedisTemplate redisTemplate;
 
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
@@ -38,10 +44,18 @@ public class ContentLocationService {
         Optional<ContentLocation> locationOptional = contentLocationRepository.findById(id);
         if (locationOptional.isPresent()) {
             ContentLocation location = locationOptional.get();
+            saveContentIdToRedis(id, userId);
+
             return mapToContentLocationDetailDto(location, userId);
         } else {
             throw new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found");
         }
+    }
+
+    private void saveContentIdToRedis(Long locationId, Integer userId) {
+        String key = "requestedContentLocationIds:" + userId;
+        BoundSetOperations<String, String> setOps = redisTemplate.boundSetOps(key);
+        setOps.add(locationId.toString());
     }
 
     private ContentLocationDetailDto mapToContentLocationDetailDto(ContentLocation location) {
@@ -118,5 +132,30 @@ public class ContentLocationService {
         Page<ContentLocation> locations = contentLocationRepository.findByKeyword(trimmedKeyword, pageable);
 
         return locations.map(this::mapToContentLocationDetailDto);
+    }
+
+    public Page<ContentLocationDetailDto> getHistoryContentLocationss(Pageable pageable, Integer userId) {
+        String key = "requestedContentLocationIds:"+userId;
+        Set<String> contentLocationIds = redisTemplate.boundSetOps(key).members();
+
+        if (contentLocationIds == null || contentLocationIds.isEmpty()) {
+            return Page.empty();
+        }
+
+        List<Long> idList = contentLocationIds.stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+
+        List<ContentLocation> contents = contentLocationRepository.findAllById(idList);
+        List<ContentLocationDetailDto> contentSearchDtos = contents.stream()
+                .map(this::mapToContentLocationDetailDto)
+                .collect(Collectors.toList());
+
+        int start = Math.min((int)pageable.getOffset(), contentSearchDtos.size());
+        int end = Math.min((start + pageable.getPageSize()), contentSearchDtos.size());
+
+        List<ContentLocationDetailDto> pagedContent = contentSearchDtos.subList(start, end);
+
+        return new PageImpl<>(pagedContent, pageable, contentSearchDtos.size());
     }
 }

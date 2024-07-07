@@ -23,10 +23,9 @@ import com.tbag.tbag_backend.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.redis.core.BoundSetOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +33,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,6 +48,7 @@ public class ContentService {
     private final LocationImageRepository locationImageRepository;
     private final ContentArtistRepository contentArtistRepository;
     private final UserRepository userRepository;
+    private final RedisTemplate redisTemplate;
     @Value("${tmdb.base-image-url}")
     private String imageBaseUrl;
 
@@ -65,11 +66,43 @@ public class ContentService {
         contentRepository.save(content);
     }
 
+    public Page<ContentSearchDto> getHistoryContents(Pageable pageable, Integer userId) {
+        String key = "requestedContentIds:"+userId;
+        Set<String> contentIds = redisTemplate.boundSetOps(key).members();
+
+        if (contentIds == null || contentIds.isEmpty()) {
+            return Page.empty();
+        }
+
+        List<Long> idList = contentIds.stream()
+                .map(Long::valueOf)
+                .collect(Collectors.toList());
+
+        List<Content> contents = contentRepository.findAllById(idList);
+        List<ContentSearchDto> contentSearchDtos = contents.stream()
+                .map(this::getContentSearchDto)
+                .collect(Collectors.toList());
+
+        int start = Math.min((int)pageable.getOffset(), contentSearchDtos.size());
+        int end = Math.min((start + pageable.getPageSize()), contentSearchDtos.size());
+
+        List<ContentSearchDto> pagedContent = contentSearchDtos.subList(start, end);
+
+        return new PageImpl<>(pagedContent, pageable, contentSearchDtos.size());
+    }
+
     @Translate
-    public ContentSearchDto getContentById(Long contentId) {
+    public ContentSearchDto getContentById(Long contentId, Integer userId) {
         Content content = contentRepository.findById(contentId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Content not found with id:" + contentId));
+        saveContentIdToRedis(contentId, userId);
 
         return getContentSearchDto(content);
+    }
+
+    private void saveContentIdToRedis(Long contentId, Integer userId) {
+        String key = "requestedContentIds:"+userId;
+        BoundSetOperations<String, String> setOps = redisTemplate.boundSetOps(key);
+        setOps.add(contentId.toString());
     }
 
     private ContentSearchDto getContentSearchDto(Content content) {
