@@ -23,6 +23,7 @@ public class ContentLocationDetailedDto {
     private String holiday;
     @Trans
     private String locationString;
+    private String website;
     private String placeType;
     private String mediaType;
     private Double latitude;

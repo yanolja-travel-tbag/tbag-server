@@ -113,6 +113,7 @@ public class ContentLocationService {
                 .businessHours(location.getContentLocationBusinessHoursKey())
                 .holiday(location.getContentLocationHolidayKey())
                 .locationString(location.getContentLocationLocationStringKey())
+                .website(location.getWebsite())
                 .placeType(location.getPlaceType())
                 .mediaType(content.getMediaType())
                 .latitude(location.getLatitude())
@@ -132,7 +133,6 @@ public class ContentLocationService {
     private LocationImageDto mapToLocationImageDto(LocationImage image) {
         return LocationImageDto.builder()
                 .imageUrl(image.getImageUrl())
-                .thumbnailUrl(image.getThumbnailUrl())
                 .sizeHeight(image.getSizeHeight())
                 .sizeWidth(image.getSizeWidth())
                 .build();

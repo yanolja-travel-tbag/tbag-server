@@ -32,6 +32,9 @@ public class ContentLocation {
     @Column(name = "break_time", columnDefinition = "VARCHAR(255)")
     private String breakTime;
 
+    @Column(name = "website")
+    private String website;
+
     @Column(name = "latitude", nullable = false)
     private Double latitude;
 
