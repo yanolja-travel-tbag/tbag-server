@@ -215,10 +215,12 @@ public class ContentService {
             contents = contentRepository.findByMediaTypeAndGenreOrderByViewCountDesc(MediaType.valueOf(mediaType.toUpperCase()), genre, pageable);
         }
 
-        return contents.map(content -> getFilteredContentDto(content, mediaType));
+        return contents.map(content -> getFilteredContentDto(content));
     }
 
-    private ContentSimpleDto getFilteredContentDto(Content content, String mediaType) {
+    private ContentSimpleDto getFilteredContentDto(Content content) {
+
+        String mediaType = content.getMediaType(Locale.ENGLISH);
 
         String image;
 
@@ -241,7 +243,7 @@ public class ContentService {
     public List<ContentSimpleDto> getTop5ByViewCount(String mediaType) {
         List<Content> contents = contentRepository.findTop5ByMediaTypeOrderByViewCountDesc(MediaType.valueOf(mediaType.toUpperCase()));
         return contents.stream()
-                .map(content -> getFilteredContentDto(content, mediaType))
+                .map(content -> getFilteredContentDto(content))
                 .collect(Collectors.toList());
     }
 
@@ -269,7 +271,7 @@ public class ContentService {
         }
 
         return recommendedContents.stream()
-                .map(content -> getFilteredContentDto(content, content.getMediaType(Locale.ENGLISH)))
+                .map(content -> getFilteredContentDto(content))
                 .collect(Collectors.toList());
     }
 
@@ -279,7 +281,7 @@ public class ContentService {
         List<Content> recommendedContents = contentRepository.findAllOrderByViewCountDesc(pageable);
 
         return recommendedContents.stream()
-                .map(content -> getFilteredContentDto(content, content.getMediaType()))
+                .map(content -> getFilteredContentDto(content))
                 .collect(Collectors.toList());
     }
 
