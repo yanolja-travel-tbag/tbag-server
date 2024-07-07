@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.tbag.tbag_backend.domain.Location.service.ContentLocationService.mapToLocationImageDto;
+
 @Service
 @RequiredArgsConstructor
 public class PublicContentLocationService {
@@ -119,15 +121,5 @@ public class PublicContentLocationService {
                 .image(image != null ? mapToLocationImageDto(image) : null)
                 .build();
     }
-
-
-    private LocationImageDto mapToLocationImageDto(LocationImage image) {
-        return LocationImageDto.builder()
-                .imageUrl(image.getImageUrl())
-                .sizeHeight(image.getSizeHeight())
-                .sizeWidth(image.getSizeWidth())
-                .build();
-    }
-
 
 }

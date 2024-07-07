@@ -33,6 +33,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.tbag.tbag_backend.domain.Location.service.ContentLocationService.mapToLocationImageDto;
+
 @Service
 @RequiredArgsConstructor
 public class ContentService {
@@ -254,14 +256,6 @@ public class ContentService {
                 .image(image != null ? mapToLocationImageDto(image) : null)
                 .contentTitle(content.getContentTitleKey())
                 .isInSchedule(isInSchedule)
-                .build();
-    }
-
-    private LocationImageDto mapToLocationImageDto(LocationImage image) {
-        return LocationImageDto.builder()
-                .imageUrl(image.getImageUrl())
-                .sizeHeight(image.getSizeHeight())
-                .sizeWidth(image.getSizeWidth())
                 .build();
     }
 

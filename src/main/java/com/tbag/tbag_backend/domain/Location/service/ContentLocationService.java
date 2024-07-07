@@ -130,9 +130,10 @@ public class ContentLocationService {
     }
 
 
-    private LocationImageDto mapToLocationImageDto(LocationImage image) {
+    public static LocationImageDto mapToLocationImageDto(LocationImage image) {
         return LocationImageDto.builder()
                 .imageUrl(image.getImageUrl())
+                .thumbnailUrl(image.getThumbnailUrl())
                 .sizeHeight(image.getSizeHeight())
                 .sizeWidth(image.getSizeWidth())
                 .build();
