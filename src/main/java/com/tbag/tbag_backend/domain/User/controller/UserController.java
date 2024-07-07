@@ -64,16 +64,18 @@ public class UserController {
     public Page<ContentSearchDto> getHistoryContents(
             @PathVariable Integer userId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return contentService.getHistoryContents(PageRequest.of(page, size), userId);
+            @RequestParam(defaultValue = "10") int size,
+            Principal principal) {
+        return contentService.getHistoryContents(PageRequest.of(page, size), userId, principal);
     }
 
     @GetMapping("/{userId}/locations-history")
     public Page<ContentLocationDetailDto> getHistoryContentLocationss(
             @PathVariable Integer userId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return contentLocationService.getHistoryContentLocationss(PageRequest.of(page, size), userId);
+            @RequestParam(defaultValue = "10") int size,
+            Principal principal) {
+        return contentLocationService.getHistoryContentLocationss(PageRequest.of(page, size), userId, principal);
     }
 
 }

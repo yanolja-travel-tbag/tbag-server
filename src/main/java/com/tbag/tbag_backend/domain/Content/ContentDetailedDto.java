@@ -8,12 +8,13 @@ import java.util.List;
 
 @Getter
 @Builder
-public class ContentSearchDto {
+public class ContentDetailedDto {
     private Long contentId;
     @Trans
     private String title;
     private String mediaType;
     private Long viewCount;
+    private List<String> genres;
     @Trans
     private List<MemberDto> members;
     private List<String> contentImages;
@@ -23,5 +24,8 @@ public class ContentSearchDto {
     public static class MemberDto {
         @Trans
         private String name;
+        @Trans
+        private String stageName;
+        private String profilePath;
     }
 }

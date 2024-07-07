@@ -20,6 +20,7 @@ import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -134,7 +135,11 @@ public class ContentLocationService {
         return locations.map(this::mapToContentLocationDetailDto);
     }
 
-    public Page<ContentLocationDetailDto> getHistoryContentLocationss(Pageable pageable, Integer userId) {
+    public Page<ContentLocationDetailDto> getHistoryContentLocationss(Pageable pageable, Integer userId, Principal principal) {
+        if (userId != Integer.parseInt(principal.getName())){
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"토큰 인증 정보와 userId 일치하지 않음");
+        }
+
         String key = "requestedContentLocationIds:"+userId;
         Set<String> contentLocationIds = redisTemplate.boundSetOps(key).members();
 

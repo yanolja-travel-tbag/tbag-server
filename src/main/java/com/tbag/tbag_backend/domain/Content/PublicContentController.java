@@ -50,7 +50,7 @@ public class PublicContentController {
 
 
     @GetMapping("/{contentId}")
-    public ContentSearchDto getContentById(@PathVariable Long contentId, Principal principal) {
+    public ContentDetailedDto getContentById(@PathVariable Long contentId, Principal principal) {
         Integer userId = (principal != null) ? Integer.parseInt(principal.getName()) : null;
         return contentService.getContentById(contentId, userId);
     }

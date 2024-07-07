@@ -54,7 +54,6 @@ public class ContentService {
 
     public Page<ContentSearchDto> searchContent(String keyword, Pageable pageable) {
         Page<Content> contents = contentRepository.findByTitleContainingAndMediaTypeNot(keyword, MediaType.ARTIST, pageable);
-
         return contents.map(content -> getContentSearchDto(content));
     }
 
@@ -66,7 +65,11 @@ public class ContentService {
         contentRepository.save(content);
     }
 
-    public Page<ContentSearchDto> getHistoryContents(Pageable pageable, Integer userId) {
+    public Page<ContentSearchDto> getHistoryContents(Pageable pageable, Integer userId, Principal principal) {
+        if (userId != Integer.parseInt(principal.getName())){
+            throw new CustomException(ErrorCode.AUTH_BAD_REQUEST,"토큰 인증 정보와 userId 일치하지 않음");
+        }
+
         String key = "requestedContentIds:"+userId;
         Set<String> contentIds = redisTemplate.boundSetOps(key).members();
 
@@ -78,25 +81,31 @@ public class ContentService {
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
 
-        List<Content> contents = contentRepository.findAllById(idList);
+        int total = idList.size();
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), total);
+
+        if (start > total) {
+            return Page.empty();
+        }
+
+        List<Long> pagedIdList = idList.subList(start, end);
+
+        List<Content> contents = contentRepository.findAllById(pagedIdList);
+
         List<ContentSearchDto> contentSearchDtos = contents.stream()
                 .map(this::getContentSearchDto)
                 .collect(Collectors.toList());
 
-        int start = Math.min((int)pageable.getOffset(), contentSearchDtos.size());
-        int end = Math.min((start + pageable.getPageSize()), contentSearchDtos.size());
-
-        List<ContentSearchDto> pagedContent = contentSearchDtos.subList(start, end);
-
-        return new PageImpl<>(pagedContent, pageable, contentSearchDtos.size());
+        return new PageImpl<>(contentSearchDtos, pageable, total);
     }
 
     @Translate
-    public ContentSearchDto getContentById(Long contentId, Integer userId) {
+    public ContentDetailedDto getContentById(Long contentId, Integer userId) {
         Content content = contentRepository.findById(contentId).orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Content not found with id:" + contentId));
         saveContentIdToRedis(contentId, userId);
 
-        return getContentSearchDto(content);
+        return getContentDetailedDto(content);
     }
 
     private void saveContentIdToRedis(Long contentId, Integer userId) {
@@ -110,7 +119,6 @@ public class ContentService {
         ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
 
         List<String> contentImages = new ArrayList<>();
-        List<String> contentGenres = null;
 
         List<ContentSearchDto.MemberDto> members = null;
 
@@ -121,6 +129,56 @@ public class ContentService {
             members = artist.getArtistMembers().stream()
                     .map(artistMember -> ContentSearchDto.MemberDto.builder()
                             .name(artistMember.getArtistMemberNameKey())
+                            .build())
+                    .limit(3)
+                    .collect(Collectors.toList());
+
+            contentImages.add(artist.getProfileImage());
+
+        } else {
+            members = content.getContentActors().stream()
+                    .map(contentActor -> ContentSearchDto.MemberDto.builder()
+                            .name(contentActor.getActor().getActorNameKey())
+                            .build())
+                    .limit(3)
+                    .collect(Collectors.toList());
+
+
+            if (contentDetails.getPosterPath() != null) {
+                contentImages.add(imageBaseUrl + contentDetails.getPosterPath());
+            }
+            if (contentDetails.getBackdropPath() != null) {
+                contentImages.add(imageBaseUrl + contentDetails.getBackdropPath());
+            }
+        }
+
+        return ContentSearchDto.builder()
+                .contentId(content.getId())
+                .title(content.getContentTitleKey())
+                .mediaType(content.getMediaType())
+                .viewCount(content.getViewCount())
+                .members(members)
+                .contentImages(contentImages)
+                .build();
+    }
+
+
+    private ContentDetailedDto getContentDetailedDto(Content content) {
+
+        ContentDetails contentDetails = contentDetailsRepository.findById(content.getId()).orElse(null);
+
+        List<String> contentImages = new ArrayList<>();
+        List<String> contentGenres = null;
+
+        List<ContentDetailedDto.MemberDto> members = null;
+
+        if (content.isMediaTypeArtist()) {
+
+            Artist artist = contentArtistRepository.findOneByContentId(content.getId()).getArtist();
+
+            members = artist.getArtistMembers().stream()
+                    .map(artistMember -> ContentDetailedDto.MemberDto.builder()
+                            .name(artistMember.getArtistMemberNameKey())
                             .stageName(artistMember.getArtistMemberNameKey())
                             .profilePath(artistMember.getProfileImage())
                             .build())
@@ -130,7 +188,7 @@ public class ContentService {
 
         } else {
             members = content.getContentActors().stream()
-                    .map(contentActor -> ContentSearchDto.MemberDto.builder()
+                    .map(contentActor -> ContentDetailedDto.MemberDto.builder()
                             .name(contentActor.getActor().getActorNameKey())
                             .stageName(contentActor.getContentActorCharacterKey())
                             .profilePath(imageBaseUrl + contentActor.getActor().getProfilePath())
@@ -141,7 +199,7 @@ public class ContentService {
             contentGenres = getGenresAndImages(content, contentDetails, contentImages, contentGenreRepository, imageBaseUrl);
         }
 
-        return ContentSearchDto.builder()
+        return ContentDetailedDto.builder()
                 .contentId(content.getId())
                 .title(content.getContentTitleKey())
                 .mediaType(content.getMediaType())
