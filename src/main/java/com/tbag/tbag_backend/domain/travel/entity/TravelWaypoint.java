@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import com.tbag.tbag_backend.domain.travel.component.DistanceMatrix;
 import com.tbag.tbag_backend.domain.travel.dto.TravelSegmentResponse;
+import com.tbag.tbag_backend.domain.travel.util.DistanceFormatter;
 import lombok.*;
 import org.json.JSONObject;
 
@@ -13,9 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-
-import static com.tbag.tbag_backend.domain.travel.util.DistanceFormatter.formatDistance;
-import static com.tbag.tbag_backend.domain.travel.util.DistanceFormatter.formatDuration;
 
 @Entity
 @Getter
@@ -86,13 +84,13 @@ public class TravelWaypoint {
                     if (elements.getString("status").equals("ZERO_RESULTS")) {
                         response.setDistance(0L);
                         response.setDuration(0L);
-                        response.setDistanceString(formatDistance(0));
-                        response.setDurationString(formatDuration(0));
+                        response.setDistanceString(DistanceFormatter.formatDistance(0));
+                        response.setDurationString(DistanceFormatter.formatDuration(0));
                     } else {
                         response.setDistance(elements.getJSONObject("distance").getLong("value"));
                         response.setDuration(elements.getJSONObject("duration").getLong("value"));
-                        response.setDistanceString(elements.getJSONObject("distance").getString("text"));
-                        response.setDurationString(elements.getJSONObject("duration").getString("text"));
+                        response.setDistanceString(DistanceFormatter.formatDistance(response.getDistance()));
+                        response.setDurationString(DistanceFormatter.formatDuration(response.getDuration()));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

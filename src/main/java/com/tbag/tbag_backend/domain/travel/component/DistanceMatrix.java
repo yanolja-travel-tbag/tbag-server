@@ -91,8 +91,8 @@ public class DistanceMatrix {
         } else {
             segment.setDistance(elements.getJSONObject("distance").getLong("value"));
             segment.setDuration(elements.getJSONObject("duration").getLong("value"));
-            segment.setDistanceString(elements.getJSONObject("distance").getString("text"));
-            segment.setDurationString(elements.getJSONObject("duration").getString("text"));
+            segment.setDistanceString(DistanceFormatter.formatDistance(segment.getDistance()));
+            segment.setDurationString(DistanceFormatter.formatDuration(segment.getDuration()));
         }
     }
 
