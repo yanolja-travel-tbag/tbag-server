@@ -19,6 +19,8 @@ public class TravelSegmentResponse {
         private Long locationId;
         @Trans
         private String placeName;
+        @Trans
+        private String contentMediaType;
         private String image;
         private Double latitude;
         private Double longitude;

@@ -11,6 +11,7 @@ import javax.persistence.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -123,6 +124,7 @@ public class TravelWaypoint {
         if (location != null) {
             locationDTO.setLocationId(location.getId());
             locationDTO.setPlaceName(location.getContentLocationPlaceNameKey());
+            locationDTO.setContentMediaType(location.getContent().getMediaType(Locale.US).toUpperCase());
             locationDTO.setLatitude(location.getLatitude());
             locationDTO.setLongitude(location.getLongitude());
             locationDTO.setAddresses(location.getContentLocationLocationStringKey());

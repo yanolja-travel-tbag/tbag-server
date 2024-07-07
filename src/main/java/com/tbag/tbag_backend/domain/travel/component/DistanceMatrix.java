@@ -97,6 +97,7 @@ public class DistanceMatrix {
         location.setLatitude(contentLocation.getLatitude());
         location.setLongitude(contentLocation.getLongitude());
         location.setPlaceName(contentLocation.getContentLocationPlaceNameKey());
+        location.setContentMediaType(contentLocation.getContent().getMediaType(Locale.US).toUpperCase());
         location.setImage(contentLocation.getLocationImages().stream().findFirst().get().getImageUrl());
 
         if (isOrigin) {
