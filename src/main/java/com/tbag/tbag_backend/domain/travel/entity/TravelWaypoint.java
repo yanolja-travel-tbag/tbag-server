@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
+
+import static com.tbag.tbag_backend.domain.travel.util.DistanceFormatter.formatDistance;
+import static com.tbag.tbag_backend.domain.travel.util.DistanceFormatter.formatDuration;
 
 @Entity
 @Getter
@@ -78,17 +80,26 @@ public class TravelWaypoint {
 
             return distanceMatrix.getDistanceMatrixAsync(origins, destinations).thenApply(distanceMatrixResponse -> {
                 try {
-                    JSONObject element = distanceMatrixResponse.getJSONArray("rows").getJSONObject(0)
+                    JSONObject elements = distanceMatrixResponse.getJSONArray("rows").getJSONObject(0)
                             .getJSONArray("elements").getJSONObject(0);
-                    response.setDistance(element.getJSONObject("distance").getLong("value"));
-                    response.setDuration(element.getJSONObject("duration").getLong("value"));
-                    response.setDistanceString(element.getJSONObject("distance").getString("text"));
-                    response.setDurationString(element.getJSONObject("duration").getString("text"));
+
+                    if (elements.getString("status").equals("ZERO_RESULTS")) {
+                        response.setDistance(0L);
+                        response.setDuration(0L);
+                        response.setDistanceString(formatDistance(0));
+                        response.setDurationString(formatDuration(0));
+                    } else {
+                        response.setDistance(elements.getJSONObject("distance").getLong("value"));
+                        response.setDuration(elements.getJSONObject("duration").getLong("value"));
+                        response.setDistanceString(elements.getJSONObject("distance").getString("text"));
+                        response.setDurationString(elements.getJSONObject("duration").getString("text"));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return response;
             });
+
         } else {
 
             return CompletableFuture.completedFuture(response);

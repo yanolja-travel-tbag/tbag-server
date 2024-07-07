@@ -1,17 +1,19 @@
 package com.tbag.tbag_backend.domain.travel.service;
 
-import com.tbag.tbag_backend.common.Language;
 import com.tbag.tbag_backend.domain.Location.entity.ContentLocation;
 import com.tbag.tbag_backend.domain.Location.repository.ContentLocationRepository;
 import com.tbag.tbag_backend.domain.User.entity.User;
 import com.tbag.tbag_backend.domain.User.repository.UserRepository;
 import com.tbag.tbag_backend.domain.travel.component.DistanceMatrix;
+import com.tbag.tbag_backend.domain.travel.dto.TravelRequestDto;
 import com.tbag.tbag_backend.domain.travel.dto.TravelRouteResponse;
 import com.tbag.tbag_backend.domain.travel.dto.TravelSegmentResponse;
+import com.tbag.tbag_backend.domain.travel.dto.TravelWaypointDto;
 import com.tbag.tbag_backend.domain.travel.entity.TravelRequest;
 import com.tbag.tbag_backend.domain.travel.entity.TravelWaypoint;
 import com.tbag.tbag_backend.domain.travel.repository.TravelRequestRepository;
 import com.tbag.tbag_backend.domain.travel.repository.TravelWaypointRepository;
+import com.tbag.tbag_backend.domain.travel.util.DistanceFormatter;
 import com.tbag.tbag_backend.exception.CustomException;
 import com.tbag.tbag_backend.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,15 +40,14 @@ public class TravelService {
     private final DistanceMatrix distanceMatrix;
 
     @Transactional
-    public TravelRequest createTravelRequest(Integer userId, String name, LocalDate startDate, LocalDate endDate) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
+    public TravelRequest createTravelRequest(TravelRequestDto travelRequestDto) {
+        User user = findUserById(travelRequestDto.getUserId());
 
         TravelRequest travelRequest = TravelRequest.builder()
                 .user(user)
-                .name(name)
-                .startDate(startDate)
-                .endDate(endDate)
+                .name(travelRequestDto.getName())
+                .startDate(travelRequestDto.getStartDate())
+                .endDate(travelRequestDto.getEndDate())
                 .build();
         return travelRequestRepository.save(travelRequest);
     }
@@ -55,80 +58,21 @@ public class TravelService {
 
         List<TravelSegmentResponse> segmentResponses = futureResponses.get();
 
-        long totalDistance = segmentResponses.stream()
-                .mapToLong(segment -> Optional.ofNullable(segment.getDistance())
-                        .orElse(0L))
-                .sum();
-        long totalDuration = segmentResponses.stream()
-                .mapToLong(segment -> Optional.ofNullable(segment.getDuration())
-                        .orElse(0L))
-                .sum();
+        long totalDistance = calculateTotalDistance(segmentResponses);
+        long totalDuration = calculateTotalDuration(segmentResponses);
 
-        TravelRouteResponse travelRouteResponse = new TravelRouteResponse();
-        travelRouteResponse.setSegments(segmentResponses);
-        travelRouteResponse.setTotalDistance(totalDistance);
-        travelRouteResponse.setTotalDuration(totalDuration);
-        travelRouteResponse.setTotalDistanceString(formatDistance(totalDistance));
-        travelRouteResponse.setTotalDurationString(formatDuration(totalDuration));
-
-        return travelRouteResponse;
-    }
-
-    private String formatDistance(long distanceInMeters) {
-        Locale locale = Language.ofLocale().getLocale();
-        if (locale.getLanguage().equals(new Locale("ko").getLanguage())) {
-            if (distanceInMeters >= 1000) {
-                return String.format(locale, "%.2f km", distanceInMeters / 1000.0);
-            } else {
-                return String.format(locale, "%d m", distanceInMeters);
-            }
-        } else {
-            if (distanceInMeters >= 1000) {
-                return String.format(locale, "%.2f km", distanceInMeters / 1000.0);
-            } else {
-                return String.format(locale, "%d meters", distanceInMeters);
-            }
-        }
-    }
-
-    private String formatDuration(long durationInSeconds) {
-        Locale locale = Language.ofLocale().getLocale();
-        if (locale.getLanguage().equals(new Locale("ko").getLanguage())) {
-            if (durationInSeconds >= 3600) {
-                return String.format(locale, "%.2f 시간", durationInSeconds / 3600.0);
-            } else if (durationInSeconds >= 60) {
-                return String.format(locale, "%d 분", durationInSeconds / 60);
-            } else {
-                return String.format(locale, "%d 초", durationInSeconds);
-            }
-        } else {
-            if (durationInSeconds >= 3600) {
-                return String.format(locale, "%.2f hours", durationInSeconds / 3600.0);
-            } else if (durationInSeconds >= 60) {
-                return String.format(locale, "%d minutes", durationInSeconds / 60);
-            } else {
-                return String.format(locale, "%d seconds", durationInSeconds);
-            }
-        }
+        return buildTravelRouteResponse(segmentResponses, totalDistance, totalDuration);
     }
 
     @Transactional
-    public void addWaypoint(Long travelRequestId, Long locationId) {
-        TravelRequest travelRequest = travelRequestRepository.findById(travelRequestId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Invalid travel request ID"));
-        ContentLocation location = contentLocationRepository.findById(locationId)
-                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found"));
-        List<TravelWaypoint> travelWaypoints = travelWaypointRepository.findByTravelRequestIdOrderBySequenceAsc(travelRequestId);
+    public void addWaypoint(TravelWaypointDto travelWaypointDto) {
+        TravelRequest travelRequest = findTravelRequestById(travelWaypointDto.getTravelRequestId());
+        ContentLocation location = findContentLocationById(travelWaypointDto.getLocationId());
+        List<TravelWaypoint> travelWaypoints = travelWaypointRepository.findByTravelRequestIdOrderBySequenceAsc(travelWaypointDto.getTravelRequestId());
 
-        boolean locationExists = travelWaypoints.stream()
-                .anyMatch(waypoint -> waypoint.getOriginLocation().getId().equals(locationId));
-        if (locationExists) {
-            throw new CustomException(ErrorCode.DUPLICATED_DATA, "The location is already present in the travel request.");
-        }
+        validateWaypoint(travelWaypoints, travelWaypointDto.getLocationId());
 
-        TravelWaypoint lastWaypoint = travelWaypoints.stream()
-                .max(Comparator.comparing(TravelWaypoint::getSequence))
-                .orElse(null);
+        TravelWaypoint lastWaypoint = travelWaypoints.stream().max(Comparator.comparing(TravelWaypoint::getSequence)).orElse(null);
 
         if (lastWaypoint != null) {
             lastWaypoint.setDestLocation(location);
@@ -144,17 +88,10 @@ public class TravelService {
         travelWaypointRepository.save(newWaypoint);
     }
 
-
     public void optimizeRoute(Long travelRequestId) throws IOException, ExecutionException, InterruptedException {
         List<TravelWaypoint> waypoints = resetWaypoints(travelRequestId);
-        String[] locations = new String[waypoints.size()];
-        List<Long> waypointIds = new ArrayList<>();
-
-        for (int i = 0; i < waypoints.size(); i++) {
-            ContentLocation location = waypoints.get(i).getOriginLocation();
-            locations[i] = location.getLatitude() + "," + location.getLongitude();
-            waypointIds.add(waypoints.get(i).getId());
-        }
+        String[] locations = extractLocations(waypoints);
+        List<Long> waypointIds = extractWaypointIds(waypoints);
 
         distanceMatrix.buildTravelSegments(locations, waypointIds);
     }
@@ -179,7 +116,6 @@ public class TravelService {
 
     public List<TravelRequest> getTravelRequests(Principal principal) {
         Integer userId = Integer.parseInt(principal.getName());
-
         return travelRequestRepository.findByUserId(userId);
     }
 
@@ -191,4 +127,59 @@ public class TravelService {
         travelRequestRepository.deleteById(id);
     }
 
+    private User findUserById(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
+    }
+
+    private TravelRequest findTravelRequestById(Long travelRequestId) {
+        return travelRequestRepository.findById(travelRequestId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Invalid travel request ID"));
+    }
+
+    private ContentLocation findContentLocationById(Long locationId) {
+        return contentLocationRepository.findById(locationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "Location not found"));
+    }
+
+    private void validateWaypoint(List<TravelWaypoint> travelWaypoints, Long locationId) {
+        if (travelWaypoints.stream().anyMatch(waypoint -> waypoint.getOriginLocation().getId().equals(locationId))) {
+            throw new CustomException(ErrorCode.DUPLICATED_DATA, "The location is already present in the travel request.");
+        }
+    }
+
+    private long calculateTotalDistance(List<TravelSegmentResponse> segmentResponses) {
+        return segmentResponses.stream()
+                .mapToLong(segment -> Optional.ofNullable(segment.getDistance()).orElse(0L))
+                .sum();
+    }
+
+    private long calculateTotalDuration(List<TravelSegmentResponse> segmentResponses) {
+        return segmentResponses.stream()
+                .mapToLong(segment -> Optional.ofNullable(segment.getDuration()).orElse(0L))
+                .sum();
+    }
+
+    private TravelRouteResponse buildTravelRouteResponse(List<TravelSegmentResponse> segmentResponses, long totalDistance, long totalDuration) {
+        TravelRouteResponse travelRouteResponse = new TravelRouteResponse();
+        travelRouteResponse.setSegments(segmentResponses);
+        travelRouteResponse.setTotalDistance(totalDistance);
+        travelRouteResponse.setTotalDuration(totalDuration);
+        travelRouteResponse.setTotalDistanceString(DistanceFormatter.formatDistance(totalDistance));
+        travelRouteResponse.setTotalDurationString(DistanceFormatter.formatDuration(totalDuration));
+
+        return travelRouteResponse;
+    }
+
+    private String[] extractLocations(List<TravelWaypoint> waypoints) {
+        return waypoints.stream()
+                .map(waypoint -> waypoint.getOriginLocation().getLatitude() + "," + waypoint.getOriginLocation().getLongitude())
+                .toArray(String[]::new);
+    }
+
+    private List<Long> extractWaypointIds(List<TravelWaypoint> waypoints) {
+        return waypoints.stream()
+                .map(TravelWaypoint::getId)
+                .collect(Collectors.toList());
+    }
 }

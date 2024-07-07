@@ -28,12 +28,7 @@ public class TravelController {
 
     @PostMapping("/request")
     public TravelRequest createTravelRequest(@RequestBody TravelRequestDto travelRequestDto) {
-        return travelService.createTravelRequest(
-                travelRequestDto.getUserId(),
-                travelRequestDto.getName(),
-                travelRequestDto.getStartDate(),
-                travelRequestDto.getEndDate()
-        );
+        return travelService.createTravelRequest(travelRequestDto);
     }
 
     @GetMapping("/request/{id}")
@@ -48,10 +43,7 @@ public class TravelController {
 
     @PostMapping("/waypoint")
     public void addWaypoint(@RequestBody TravelWaypointDto travelWaypointDto) {
-        travelService.addWaypoint(
-                travelWaypointDto.getTravelRequestId(),
-                travelWaypointDto.getLocationId()
-        );
+        travelService.addWaypoint(travelWaypointDto);
     }
 
     @DeleteMapping("/waypoint/{id}")
@@ -64,4 +56,3 @@ public class TravelController {
         travelService.optimizeRoute(travelRequestId);
     }
 }
-
