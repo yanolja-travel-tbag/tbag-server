@@ -262,8 +262,8 @@ public class ContentService {
     public Page<ContentSimpleDto> getFilteredContent(String mediaType, Long genreId, Pageable pageable) {
         Page<Content> contents = null;
 
-        if (mediaType.equals("artist")) {
-            contents = contentRepository.findByMediaTypeOrderByViewCountDesc(MediaType.valueOf(mediaType), pageable);
+        if (mediaType.toLowerCase().equals("artist")) {
+            contents = contentRepository.findByMediaTypeOrderByViewCountDesc(MediaType.valueOf(mediaType.toUpperCase()), pageable);
         } else {
             Genre genre = genreRepository.findById(genreId)
                     .orElseThrow(() -> new CustomException(ErrorCode.ENTITY_NOT_FOUND, "genre not found"));
