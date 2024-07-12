@@ -51,5 +51,16 @@ public interface ContentLocationRepository extends JpaRepository<ContentLocation
             "LOWER(t3.value) LIKE LOWER(CONCAT('%', :keyword, '%'))) ")
     Page<ContentLocation> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT cl.id as id, cl.content.title as contentTitle, cl.content.titleEng as contentTitleEng, cl.content.mediaType as contentMediaType, cl.latitude as latitude, cl.longitude as longitude " +
+            "FROM ContentLocation cl " +
+            "WHERE ST_Distance_Sphere(cl.location, ST_GeomFromText(:point, 4326)) <= :distance * 1000")
+    List<MapContentLocationProjection> findAllWithinDistance(@Param("point") String point, @Param("distance") int distance);
+
+    @Query("SELECT cl.id as id, cl.content.title as contentTitle, cl.content.titleEng as contentTitleEng, cl.content.mediaType as contentMediaType, cl.latitude as latitude, cl.longitude as longitude " +
+            "FROM ContentLocation cl " +
+            "JOIN cl.content c " +
+            "WHERE ST_Distance_Sphere(cl.location, ST_GeomFromText(:point, 4326)) <= :distance * 1000 " +
+            "AND c.mediaType = :mediaType")
+    List<MapContentLocationProjection> findAllWithinDistance(@Param("mediaType") MediaType mediaType, @Param("point") String point, @Param("distance") int distance);
 
 }

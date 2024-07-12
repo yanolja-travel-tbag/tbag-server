@@ -65,6 +65,20 @@ public class PublicContentLocationService {
                 .collect(Collectors.toList());
     }
 
+    public List<MapContentLocationDto> getContentLocationsWithinDistance(String mediaType, double latitude, double longitude, int distance) {
+        String point = "POINT(" + latitude + " " + longitude + ")";
+        List<MapContentLocationProjection> contentLocations;
+
+        if (mediaType.equals("all")) {
+            contentLocations = contentLocationRepository.findAllWithinDistance(point, distance);
+        } else {
+            contentLocations = contentLocationRepository.findAllWithinDistance(MediaType.valueOf(mediaType.toUpperCase()), point, distance);
+        }
+        String localeLanguage = Language.ofLocale().name();
+        return contentLocations.stream()
+                .map(projection -> mapToMapContentLocationDto(projection, localeLanguage))
+                .collect(Collectors.toList());
+    }
 
     public MarkerLocationDto getContentLocationById(Long id) {
         Optional<ContentLocation> locationOptional = contentLocationRepository.findById(id);

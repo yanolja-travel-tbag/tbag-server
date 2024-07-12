@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,9 @@ public class ContentLocation {
 
     @Column(name = "longitude", nullable = false)
     private Double longitude;
+
+    @Column(name = "location", nullable = false, columnDefinition = "POINT SRID 4326")
+    private Point location;
 
     @Column(name = "phone_number", columnDefinition = "VARCHAR(255)")
     private String phoneNumber;

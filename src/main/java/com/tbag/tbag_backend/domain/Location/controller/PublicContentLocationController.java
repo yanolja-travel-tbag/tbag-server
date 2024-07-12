@@ -39,6 +39,15 @@ public class PublicContentLocationController {
         return publicContentLocationService.getContentLocations(mediaType);
     }
 
+    @GetMapping("/within-distance")
+    public List<MapContentLocationDto> getContentLocationsWithinDistance(
+            @RequestParam(required = false, defaultValue = "all") String mediaType,
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam int distance) {
+        return publicContentLocationService.getContentLocationsWithinDistance(mediaType, latitude, longitude, distance);
+    }
+
     @GetMapping("/{id}")
     public MarkerLocationDto getContentLocationById(@PathVariable Long id) {
         return publicContentLocationService.getContentLocationById(id);
