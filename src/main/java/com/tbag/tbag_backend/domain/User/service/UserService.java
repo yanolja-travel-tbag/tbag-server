@@ -93,7 +93,7 @@ public class UserService {
 
         Map<String, List<UserPreferredGenreDto>> preferredGenres = userPreferredGenreRepository.findByUser(user).stream()
                 .map(upg -> UserPreferredGenreDto.builder()
-                        .mediaType(com.tbag.tbag_backend.domain.Content.MediaType.valueOf(upg.getId().getMediaType().toUpperCase()).getName(Locale.US))
+                        .mediaType(com.tbag.tbag_backend.domain.Content.MediaType.valueOf(upg.getId().getMediaType().toUpperCase()).getName(Locale.US).toLowerCase())
                         .genreId(upg.getGenre().getId())
                         .genreName(upg.getGenre().getGenreName())
                         .build())
