@@ -30,9 +30,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import javax.print.attribute.standard.Media;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -91,7 +93,7 @@ public class UserService {
 
         Map<String, List<UserPreferredGenreDto>> preferredGenres = userPreferredGenreRepository.findByUser(user).stream()
                 .map(upg -> UserPreferredGenreDto.builder()
-                        .mediaType(com.tbag.tbag_backend.domain.Content.MediaType.valueOf(upg.getId().getMediaType().toUpperCase()).getName(Language.ofLocale().getLocale()))
+                        .mediaType(com.tbag.tbag_backend.domain.Content.MediaType.valueOf(upg.getId().getMediaType().toUpperCase()).getName(Locale.US))
                         .genreId(upg.getGenre().getId())
                         .genreName(upg.getGenre().getGenreName())
                         .build())
