@@ -3,7 +3,8 @@
 <img width="1039" alt="image" src="https://github.com/yanolja-travel-tbag/tbag-server/assets/74501631/8a8fb197-b981-4c3d-8372-53d9050624a5">
 
 
-### 2024년 야놀자, 인터파크 공동주최 [트래블 이노베이션 아이디어 공모전] 대상 수상작 👑 
+### 2024년 [트래블 이노베이션 아이디어 공모전] 대상 수상작 👑 
+야놀자리서치, 야놀자, 인터파크트리플 공동주최
 
 
 ### 소개
@@ -99,8 +100,21 @@ TBAG은 K-드라마, 영화, 아이돌 등의 팬들을 위한 여행 가이드 
 
 - **번역 데이터**
   - DeepL Translation API와 Google Translation Library를 이용한 다국어 처리
-
+   
 - **경로 데이터**
   - Google Map Distance Matrix API를 통한 최적 경로 정보
 
+  
+### Preview
+| 소셜 로그인 및 회원가입 |                                                   메인 바텀시트                                                   | 장소 상세 바텀시트 |
+|:---:|:-----------------------------------------------------------------------------------------------------------:|:---:|
+| ![google-social-login](https://github.com/user-attachments/assets/768eaf66-f29a-4a2d-b28d-296a74734ffb) | ![main-bottomsheet-filter](https://github.com/user-attachments/assets/4adfc6a2-69d3-4868-8be7-8de442e6299f) | ![place-detail-bottomsheet](https://github.com/user-attachments/assets/5a709ea5-0ddc-4291-9167-aab60a6e9911) |
+| 지도 및 마커 필터 |                                                   연예인 검색                                                    | 장소 검색 |
+| ![map-marker-filter](https://github.com/user-attachments/assets/2f101e8d-2dee-4e6f-a70a-de2116ecc14b) |      ![search-artist](https://github.com/user-attachments/assets/a085c01f-e18a-456a-ab3b-2d3f0ea526bb)      | ![search-place](https://github.com/user-attachments/assets/ac4f4649-e5c8-40a8-ba82-3688c4d1284f) |
+| 콘텐츠 및 상세 정보 |                                                    히스토리                                                     | 여행 일정 |
+| ![content-contentdetail](https://github.com/user-attachments/assets/b18fef1d-7be8-4681-ae43-aa1aeec7360a) |         ![history](https://github.com/user-attachments/assets/15691115-8296-44a1-ae55-f76ba760e193)         | ![add-schedule](https://github.com/user-attachments/assets/2f3be3f1-7c07-4050-9a60-b37ba3c6e89d) |
+| 여행 경로 최적화 |                                                   콘텐츠 필터                                                    |
+| ![optimize-path](https://github.com/user-attachments/assets/114df763-f191-4143-87f2-4a829ef143b2) |     ![content-filter](https://github.com/user-attachments/assets/ebfd9810-de4e-432b-84c7-3d1271074279)      |
+| 언어 선택 및 국제화 |                                               다른 국제화 적용 모습                                                  |
+| ![language-i18n](https://github.com/user-attachments/assets/70662141-1650-4a71-a019-9f6708749f20) | ![language-i18n2](https://github.com/user-attachments/assets/256d4fdb-e2bf-4559-a496-c2b10cc561f3) |
 
